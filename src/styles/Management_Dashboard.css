@@ -1,0 +1,138 @@
+body {
+  font-family: 'Proxima Nova', sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f0f4f0;
+  color: #333;
+}
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  position: relative;
+}
+.dashboard,
+.h1 {
+  text-align: center;
+}
+
+h1,
+h2 {
+  color: #2c3e50;
+}
+.chart-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 35px; /* Add gap between charts */
+}
+.chart {
+  flex: 1; /* Make charts grow equally */
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+}
+.gauge-container {
+  text-align: center;
+}
+.gauge-title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+.gauge {
+  width: 300px;
+  height: 150px;
+  margin: 0 auto;
+  position: relative;
+}
+.gauge-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding-top: 65px;
+  transform: translate(-50%, -50%);
+  font-size: 86px;
+  font-weight: bold;
+}
+.gauge-scale {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+.update-button,
+.download-button {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+.download-button {
+  float: right;
+  margin-top: 0;
+}
+select {
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+#fallsLineChart {
+  display: none;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 12px;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background-color: #e8f5e9;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+.logout-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.summary-container {
+  text-align: center;
+  margin: 40px 0;
+}
+
+.summary-cards {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
