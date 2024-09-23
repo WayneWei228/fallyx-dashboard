@@ -31,6 +31,7 @@ export default function Dashboard(props) {
   const [analysisChart, setAnalysisChart] = useState();
   const [gaugeChart, setGaugeChart] = useState(true);
   const [alert, setAlert] = useState(false);
+  const [hirFalls, setHIRFalls] = useState(5);
   const firebaseConfig = {
     databaseURL: 'https://fallyx-demo-default-rtdb.firebaseio.com/',
   };
@@ -392,6 +393,7 @@ export default function Dashboard(props) {
 
         <div className="chart">
           <h2 id="analysisHeader">Falls by Time of Day</h2>
+          <h4 id="analysisHeader">Falls by HIR: {hirFalls}</h4>
           <select id="fallsAnalysisType" onChange={updateAnalysisChart}>
             <option value="timeOfDay">Time of Day</option>
             <option value="location">Location</option>
@@ -422,10 +424,8 @@ export default function Dashboard(props) {
             <th>HIR</th>
             <th>Injury</th>
             <th>Hospital</th>
-            <th>CIS</th>
             <th>PT Ref</th>
             <th>Interventions</th>
-            <th>Special care review</th>
           </tr>
         </thead>
         <tbody id="fallsTableBody">
@@ -439,9 +439,7 @@ export default function Dashboard(props) {
                 <td>{item.hir}</td>
                 <td>{item.injury}</td>
                 <td>{item.hospital}</td>
-                <td>{item.cis}</td>
                 <td>{item.ptRef}</td>
-                <td>{item.interventions}</td>
 
                 <td>{item.review}</td>
               </tr>
