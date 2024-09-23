@@ -3,10 +3,7 @@ import { Chart } from 'chart.js/auto';
 import '../styles/Management_Dashboard.css';
 import { initializeApp } from 'firebase/app';
 import { get, getDatabase, ref, onValue, update } from 'firebase/database';
-import * as XLSX from 'xlsx/xlsx.mjs';
 import { useNavigate } from 'react-router-dom';
-import 'reactjs-popup/dist/index.css';
-import Popup from 'reactjs-popup';
 import SummaryCard from './SummaryCard';
 
 
@@ -95,6 +92,11 @@ export default function Management_Dashboard(props) {
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+          },
           scales: {
             y: {
               beginAtZero: true,
@@ -129,6 +131,11 @@ export default function Management_Dashboard(props) {
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+          },
           scales: {
             y: {
               beginAtZero: true,
@@ -178,6 +185,11 @@ export default function Management_Dashboard(props) {
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+          },
           scales: {
             y: {
               beginAtZero: true,
@@ -229,6 +241,11 @@ export default function Management_Dashboard(props) {
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+          },
           scales: {
             y: {
               beginAtZero: true,
@@ -271,7 +288,7 @@ export default function Management_Dashboard(props) {
         </div>
 
         <div className="chart">
-          <h2 id="homesHeader">Homes w/ high % of non compliance</h2>
+          <h2 id="homesHeader">Number of incidents of non-compliance</h2>
           <select id="homesTimeRange" onChange={updateHomesChart}>
             <option value="current">Current Month</option>
             <option value="3months">Past 3 Months</option>
