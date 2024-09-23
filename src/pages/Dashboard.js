@@ -425,6 +425,10 @@ export default function Dashboard(props) {
             <th>Injury</th>
             <th>Hospital</th>
             <th>PT Ref</th>
+            <th>POA Contacted</th>
+            <th>Physician Ref</th>
+            <th>Incident Report Written</th>
+            <th>3 Post Fall Notes in 72 Hours</th>
             <th>Interventions</th>
           </tr>
         </thead>
@@ -440,7 +444,10 @@ export default function Dashboard(props) {
                 <td>{item.injury}</td>
                 <td>{item.hospital}</td>
                 <td>{item.ptRef}</td>
-
+                <td>{item.poaContacted}</td>
+                <td>{item.physicianRef}</td>
+                <td><input type="checkbox" checked={item.incidentReportWritten}></input></td>
+                <td><input type="checkbox" checked={item.postFallNotes}></input></td>
                 <td>{item.review}</td>
               </tr>
             );
