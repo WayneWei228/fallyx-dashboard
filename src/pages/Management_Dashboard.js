@@ -6,7 +6,6 @@ import { get, getDatabase, ref, onValue, update } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
 import SummaryCard from './SummaryCard';
 
-
 export default function Management_Dashboard(props) {
   const navigate = useNavigate();
   const [dbData, setDBData] = useState([]);
@@ -19,6 +18,34 @@ export default function Management_Dashboard(props) {
   const firebaseConfig = {
     databaseURL: 'https://fallyx-demo-default-rtdb.firebaseio.com/',
   };
+
+  const data_for_current_falls = [
+    { name: 'Niagra LTC', value: 2 },
+    { name: 'Mill creek LTC', value: 1 },
+    { name: 'The Wellington LTC', value: 2 },
+    { name: 'Ina Graftin LTC', value: 1 },
+  ];
+
+  const data_for_three_months_falls = [
+    { name: 'Niagra LTC', value: 8 },
+    { name: 'Mill creek LTC', value: 12 },
+    { name: 'The Wellington LTC', value: 15 },
+    { name: 'Ina Graftin LTC', value: 14 },
+  ];
+
+  const data_for_current_homes = [
+    { name: 'Niagra LTC', value: 2 },
+    { name: 'Mill creek LTC', value: 1 },
+    { name: 'The Wellington LTC', value: 3 },
+    { name: 'Ina Graftin LTC', value: 2 },
+  ];
+
+  const data_for_three_months_homes = [
+    { name: 'Niagra LTC', value: 8 },
+    { name: 'Mill creek LTC', value: 10 },
+    { name: 'The Wellington LTC', value: 20 },
+    { name: 'Ina Graftin LTC', value: 16 },
+  ];
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
@@ -75,15 +102,19 @@ export default function Management_Dashboard(props) {
       chart_falls_Status.destroy();
     }
 
+    let default_falls_data = [...data_for_current_falls];
+
+    default_falls_data.sort((a, b) => b.value - a.value);
+
     setFallsChart(
       new Chart(document.getElementById('FallsChart').getContext('2d'), {
         type: 'bar',
         data: {
-          labels: ['Niagra LTC', 'Mill creek LTC', 'The Wellington LTC', 'Ina Graftin LTC'],
+          labels: default_falls_data.map((item) => item.name),
           datasets: [
             {
               label: 'Number of Falls',
-              data: [2, 1, 2, 1],
+              data: default_falls_data.map((item) => item.value),
               backgroundColor: 'rgba(76, 175, 80, 0.6)',
               borderColor: 'rgb(76, 175, 80)',
               borderWidth: 1,
@@ -94,7 +125,7 @@ export default function Management_Dashboard(props) {
           responsive: true,
           plugins: {
             legend: {
-              display: false
+              display: false,
             },
           },
           scales: {
@@ -114,15 +145,19 @@ export default function Management_Dashboard(props) {
       chart_homes_Status.destroy();
     }
 
+    let default_homes_data = [...data_for_current_homes];
+
+    default_homes_data.sort((a, b) => b.value - a.value);
+
     setHomesChart(
       new Chart(document.getElementById('HomesChart').getContext('2d'), {
         type: 'bar',
         data: {
-          labels: ['Niagra LTC', 'Mill creek LTC', 'The Wellington LTC', 'Ina Graftin LTC'],
+          labels: default_homes_data.map((item) => item.name),
           datasets: [
             {
               label: 'Number of Falls',
-              data: [2, 1, 3, 2],
+              data: default_homes_data.map((item) => item.value),
               backgroundColor: 'rgba(76, 175, 80, 0.6)',
               borderColor: 'rgb(76, 175, 80)',
               borderWidth: 1,
@@ -133,7 +168,7 @@ export default function Management_Dashboard(props) {
           responsive: true,
           plugins: {
             legend: {
-              display: false
+              display: false,
             },
           },
           scales: {
@@ -154,17 +189,16 @@ export default function Management_Dashboard(props) {
     const timeRange = document.getElementById('fallsTimeRange').value;
     let newData = [];
 
-    let data_for_current = [2, 1, 2, 1];
-    let data_for_three_month = [8, 12, 15, 14];
-
     switch (timeRange) {
       case 'current':
-        newData = data_for_current;
+        newData = [...data_for_current_falls];
         break;
       case '3months':
-        newData = data_for_three_month;
+        newData = [...data_for_three_months_falls];
         break;
     }
+
+    newData.sort((a, b) => b.value - a.value);
 
     fallsChart.destroy();
 
@@ -172,11 +206,11 @@ export default function Management_Dashboard(props) {
       new Chart(document.getElementById('FallsChart').getContext('2d'), {
         type: 'bar',
         data: {
-          labels: ['Niagra LTC', 'Mill creek LTC', 'The Wellington LTC', 'Ina Graftin LTC'],
+          labels: newData.map((item) => item.name),
           datasets: [
             {
               label: 'Number of Falls',
-              data: newData,
+              data: newData.map((item) => item.value),
               backgroundColor: 'rgba(76, 175, 80, 0.6)',
               borderColor: 'rgb(76, 175, 80)',
               borderWidth: 1,
@@ -187,7 +221,7 @@ export default function Management_Dashboard(props) {
           responsive: true,
           plugins: {
             legend: {
-              display: false
+              display: false,
             },
           },
           scales: {
@@ -208,19 +242,16 @@ export default function Management_Dashboard(props) {
     const timeRange = document.getElementById('homesTimeRange').value;
     let newData = [];
 
-    let data_for_current = [2, 1, 3, 2];
-    let data_for_three_month = [8, 10, 20, 16];
-
-    console.log(timeRange);
-
     switch (timeRange) {
       case 'current':
-        newData = data_for_current;
+        newData = [...data_for_current_homes];
         break;
       case '3months':
-        newData = data_for_three_month;
+        newData = [...data_for_three_months_homes];
         break;
     }
+
+    newData.sort((a, b) => b.value - a.value);
 
     homesChart.destroy();
 
@@ -228,11 +259,11 @@ export default function Management_Dashboard(props) {
       new Chart(document.getElementById('HomesChart').getContext('2d'), {
         type: 'bar',
         data: {
-          labels: ['Niagra LTC', 'Mill creek LTC', 'The Wellington LTC', 'Ina Graftin LTC'],
+          labels: newData.map((item) => item.name),
           datasets: [
             {
               label: 'Number of Falls',
-              data: newData,
+              data: newData.map((item) => item.value),
               backgroundColor: 'rgba(76, 175, 80, 0.6)',
               borderColor: 'rgb(76, 175, 80)',
               borderWidth: 1,
@@ -243,7 +274,7 @@ export default function Management_Dashboard(props) {
           responsive: true,
           plugins: {
             legend: {
-              display: false
+              display: false,
             },
           },
           scales: {
@@ -264,10 +295,10 @@ export default function Management_Dashboard(props) {
   };
 
   const summaryData = [
-    { value: 20, title: 'Falls', subtitle: 'Niagra LTC', linkTo: '/niagra' },
-    { value: 18, title: 'Falls', subtitle: 'Mill creek LTC', linkTo: '/mill-creek' },
-    { value: 10, title: 'Falls', subtitle: 'The Wellington LTC', linkTo: '/welling' },
-    { value: 15, title: 'Falls', subtitle: 'Ina Graftin LTC', linkTo: '/ina-graftin' },
+    { value: 20, title: 'Falls', subtitle: 'Niagra LTC', linkTo: '/dashboard' },
+    { value: 18, title: 'Falls', subtitle: 'Mill creek LTC', linkTo: '/dashboard' },
+    { value: 10, title: 'Falls', subtitle: 'The Wellington LTC', linkTo: '/dashboard' },
+    { value: 15, title: 'Falls', subtitle: 'Ina Graftin LTC', linkTo: '/dashboard' },
   ];
 
   return (
