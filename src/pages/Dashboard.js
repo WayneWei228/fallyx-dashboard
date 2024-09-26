@@ -300,6 +300,44 @@ export default function Dashboard(props) {
         newLabels = ['No Injury', 'Minor', 'Moderate', 'Severe'];
         newData = [4, 2, 1, 0].map((val) => val * multiplier);
         break;
+      case 'hir':
+        switch (timeRange) {
+          case "current":
+            header.textContent = "Falls by HIR";
+            newLabels = ['September']
+            newData = [2]
+            break;
+          case "3months":
+            header.textContent = "Falls by HIR";
+            newLabels = ['July', 'August', 'September']
+            newData = [2, 1, 2]
+            break;
+          case "6months":
+            header.textContent = "Falls by HIR";
+            newLabels = ['April', 'May', 'June', 'July', 'August', 'September']
+            newData = [1, 2, 3, 0, 1, 2]
+            break;
+        }
+        break;
+      case 'recurring':
+        switch (timeRange) {
+          case "current":
+            header.textContent = "Falls by HIR";
+            newLabels = ['September']
+            newData = [1]
+            break;
+          case "3months":
+            header.textContent = "Falls by HIR";
+            newLabels = ['July', 'August', 'September']
+            newData = [0, 1, 2]
+            break;
+          case "6months":
+            header.textContent = "Falls by HIR";
+            newLabels = ['April', 'May', 'June', 'July', 'August', 'September']
+            newData = [0, 1, 4, 3, 1, 2]
+            break;
+        }
+        break;
     }
 
     analysisChart.destroy();
@@ -340,7 +378,7 @@ export default function Dashboard(props) {
 
   return (
     <div className="dashboard">
-      <h1>Mississauga LTC Falls Dashboard</h1>
+      <h1>The Wellington LTC Falls Dashboard</h1>
       <button className="logout-button" onClick={logout}>
         Log Out
       </button>
@@ -398,6 +436,8 @@ export default function Dashboard(props) {
             <option value="timeOfDay">Time of Day</option>
             <option value="location">Location</option>
             <option value="injuries">Injuries</option>
+            <option value="hir">Falls by HIR</option>
+            <option value="recurring">Residents w/ Recurring Falls</option>
           </select>
           <select id="analysisTimeRange" onChange={updateAnalysisChart}>
             <option value="current">Current Month</option>
@@ -446,8 +486,8 @@ export default function Dashboard(props) {
                 <td>{item.ptRef}</td>
                 <td>{item.poaContacted}</td>
                 <td>{item.physicianRef}</td>
-                <td><input type="checkbox" checked={item.incidentReportWritten}></input></td>
-                <td><input type="checkbox" checked={item.postFallNotes}></input></td>
+                <td><input type="checkbox" checked={item.incidentReportWritten} disabled></input></td>
+                <td><input type="checkbox" checked={item.postFallNotes} disabled></input></td>
                 <td>{item.review}</td>
               </tr>
             );
