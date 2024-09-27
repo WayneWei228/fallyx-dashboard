@@ -32,7 +32,7 @@ export default function Login() {
         users.forEach((user) => {
           console.log(user);
           if (user.username === username && user.password === password) {
-            navigate('/Management_Dashboard');
+            navigate('/managementDashboard');
           }
         });
       },
