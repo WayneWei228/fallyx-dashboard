@@ -1,2 +1,4 @@
 node_modules
 .prettierrc.js
+# Local Netlify folder
+.netlify
