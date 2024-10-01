@@ -33,7 +33,7 @@ export default function Dashboard(props) {
   const [alert, setAlert] = useState(false);
   const [hirFalls, setHIRFalls] = useState(5);
   const firebaseConfig = {
-    databaseURL: 'https://fallyx-demo-default-rtdb.firebaseio.com/',
+    databaseURL: 'https://fallyx-dashboard-default-rtdb.firebaseio.com/',
   };
 
   const app = initializeApp(firebaseConfig);
@@ -302,39 +302,39 @@ export default function Dashboard(props) {
         break;
       case 'hir':
         switch (timeRange) {
-          case "current":
-            header.textContent = "Falls by HIR";
-            newLabels = ['September']
-            newData = [2]
+          case 'current':
+            header.textContent = 'Falls by HIR';
+            newLabels = ['September'];
+            newData = [2];
             break;
-          case "3months":
-            header.textContent = "Falls by HIR";
-            newLabels = ['July', 'August', 'September']
-            newData = [2, 1, 2]
+          case '3months':
+            header.textContent = 'Falls by HIR';
+            newLabels = ['July', 'August', 'September'];
+            newData = [2, 1, 2];
             break;
-          case "6months":
-            header.textContent = "Falls by HIR";
-            newLabels = ['April', 'May', 'June', 'July', 'August', 'September']
-            newData = [1, 2, 3, 0, 1, 2]
+          case '6months':
+            header.textContent = 'Falls by HIR';
+            newLabels = ['April', 'May', 'June', 'July', 'August', 'September'];
+            newData = [1, 2, 3, 0, 1, 2];
             break;
         }
         break;
       case 'recurring':
         switch (timeRange) {
-          case "current":
-            header.textContent = "Falls by HIR";
-            newLabels = ['September']
-            newData = [1]
+          case 'current':
+            header.textContent = 'Falls by HIR';
+            newLabels = ['September'];
+            newData = [1];
             break;
-          case "3months":
-            header.textContent = "Falls by HIR";
-            newLabels = ['July', 'August', 'September']
-            newData = [0, 1, 2]
+          case '3months':
+            header.textContent = 'Falls by HIR';
+            newLabels = ['July', 'August', 'September'];
+            newData = [0, 1, 2];
             break;
-          case "6months":
-            header.textContent = "Falls by HIR";
-            newLabels = ['April', 'May', 'June', 'July', 'August', 'September']
-            newData = [0, 1, 4, 3, 1, 2]
+          case '6months':
+            header.textContent = 'Falls by HIR';
+            newLabels = ['April', 'May', 'June', 'July', 'August', 'September'];
+            newData = [0, 1, 4, 3, 1, 2];
             break;
         }
         break;
@@ -486,8 +486,12 @@ export default function Dashboard(props) {
                 <td>{item.ptRef}</td>
                 <td>{item.poaContacted}</td>
                 <td>{item.physicianRef}</td>
-                <td><input type="checkbox" checked={item.incidentReportWritten} disabled></input></td>
-                <td><input type="checkbox" checked={item.postFallNotes} disabled></input></td>
+                <td>
+                  <input type="checkbox" checked={item.incidentReportWritten} disabled></input>
+                </td>
+                <td>
+                  <input type="checkbox" checked={item.postFallNotes} disabled></input>
+                </td>
                 <td>{item.review}</td>
               </tr>
             );

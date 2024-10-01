@@ -11,7 +11,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const firebaseConfig = {
-    databaseURL: 'https://fallyx-demo-default-rtdb.firebaseio.com/',
+    databaseURL: 'https://fallyx-dashboard-default-rtdb.firebaseio.com/',
   };
 
   const app = initializeApp(firebaseConfig);
