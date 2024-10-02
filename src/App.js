@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-do
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import ManagementDashboard from './pages/ManagementDashboard';
+import TestFirebase from './components/TestFirebase';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/login" element={<Login />}></Route>
           <Route path="/dashboard" element={<Dashboard />}></Route>
           <Route path="/managementDashboard" element={<ManagementDashboard />}></Route>
+          {/* <Route path="/testFirebase" element={<TestFirebase />}></Route> */}
         </Routes>
       </div>
     </Router>

@@ -1,6 +1,7 @@
 import React from 'react';
-import { initializeApp } from 'firebase/app';
-import { get, getDatabase, ref, onValue, update } from 'firebase/database';
+import { get, getDatabase, ref } from 'firebase/database';
+import { db } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import '../styles/Dashboard.css';
 import { useNavigate } from 'react-router-dom';
@@ -10,40 +11,31 @@ export default function Login() {
   const [password, setPassword] = React.useState();
   const navigate = useNavigate();
 
-  const firebaseConfig = {
-    databaseURL: 'https://fallyx-dashboard-default-rtdb.firebaseio.com/',
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
   const login = async () => {
     const usersRef = ref(db, 'users/');
-    let users = [];
-
-    onValue(
-      usersRef,
-      async (snapshot) => {
-        console.log(snapshot.val());
-        users = await snapshot.val();
-        if (!!snapshot.val()) {
-          console.log(snapshot.val());
-        }
-        users.forEach((user) => {
-          console.log(user);
-          if (user.username === username && user.password === password) {
-            navigate('/managementDashboard');
-          }
-        });
-      },
-      {
-        onlyOnce: true,
-      }
-    );
-
+    const snapshot = await get(usersRef);
+    const users = snapshot.val();
     console.log(users);
+    
+    if (users) {
+      let userFound = false;
+      Object.values(users).forEach((user) => {
+        if (user.username === username && user.password === password) {
+          userFound = true;
+          console.log('Login successful');
+          navigate('/managementDashboard');
+        }
+      });
+      if (!userFound) {
+        console.log('Invalid username or password');
+      }
+    } else {
+      console.log('No users found');
+    }
   };
 
+
+  
   return (
     <div className="dashboard">
       <div className="gauge-container">
