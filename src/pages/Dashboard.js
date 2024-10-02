@@ -3,6 +3,7 @@ import { Chart } from 'chart.js/auto';
 import '../styles/Dashboard.css';
 import { initializeApp } from 'firebase/app';
 import { get, getDatabase, ref, onValue, update } from 'firebase/database';
+import { db } from '../firebase';
 import * as XLSX from 'xlsx/xlsx.mjs';
 import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
@@ -32,59 +33,54 @@ export default function Dashboard(props) {
   const [gaugeChart, setGaugeChart] = useState(true);
   const [alert, setAlert] = useState(false);
   const [hirFalls, setHIRFalls] = useState(5);
-  const firebaseConfig = {
-    databaseURL: 'https://fallyx-dashboard-default-rtdb.firebaseio.com/',
-  };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
 
   useEffect(() => {
-    const dataRef = ref(db, 'data/');
+    // const dataRef = ref(db, 'data/');
 
-    onValue(
-      dataRef,
-      (snapshot) => {
-        setDBData(snapshot.val());
-        if (!!snapshot.val()) {
-          console.log(snapshot.val());
-        }
-      },
-      {
-        onlyOnce: true,
-      }
-    );
+    // onValue(
+    //   dataRef,
+    //   (snapshot) => {
+    //     setDBData(snapshot.val());
+    //     if (!!snapshot.val()) {
+    //       console.log(snapshot.val());
+    //     }
+    //   },
+    //   {
+    //     onlyOnce: true,
+    //   }
+    // );
 
-    const goalRef = ref(db, 'falls_goal/');
+    // const goalRef = ref(db, 'falls_goal/');
 
-    onValue(
-      goalRef,
-      (snapshot) => {
-        console.log(snapshot.val());
-        setGoal(snapshot.val());
-        if (!!snapshot.val()) {
-          console.log(snapshot.val());
-        }
-      },
-      {
-        onlyOnce: true,
-      }
-    );
+    // onValue(
+    //   goalRef,
+    //   (snapshot) => {
+    //     console.log(snapshot.val());
+    //     setGoal(snapshot.val());
+    //     if (!!snapshot.val()) {
+    //       console.log(snapshot.val());
+    //     }
+    //   },
+    //   {
+    //     onlyOnce: true,
+    //   }
+    // );
 
-    const analysisRef = ref(db, 'tracking_table_data/');
+    // const analysisRef = ref(db, 'tracking_table_data/');
 
-    onValue(
-      analysisRef,
-      (snapshot) => {
-        setAnalysisData(snapshot.val());
-        if (!!snapshot.val()) {
-          console.log(snapshot.val());
-        }
-      },
-      {
-        onlyOnce: true,
-      }
-    );
+    // onValue(
+    //   analysisRef,
+    //   (snapshot) => {
+    //     setAnalysisData(snapshot.val());
+    //     if (!!snapshot.val()) {
+    //       console.log(snapshot.val());
+    //     }
+    //   },
+    //   {
+    //     onlyOnce: true,
+    //   }
+    // );
 
     let chartStatus = Chart.getChart('gaugeChart');
     if (chartStatus != undefined) {

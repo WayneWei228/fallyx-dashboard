@@ -23,6 +23,7 @@ export default function Login() {
         if (user.username === username && user.password === password) {
           userFound = true;
           console.log('Login successful');
+          localStorage.setItem('isLoggedIn', 'true');
           navigate('/managementDashboard');
         }
       });

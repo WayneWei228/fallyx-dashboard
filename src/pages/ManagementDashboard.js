@@ -53,7 +53,7 @@ export default function Management_Dashboard() {
 
   useEffect(() => {
     let chart_falls_Status = Chart.getChart('FallsChart');
-    if (chart_falls_Status != undefined) {
+    if (chart_falls_Status !== undefined) {
       chart_falls_Status.destroy();
     }
 
@@ -105,7 +105,7 @@ export default function Management_Dashboard() {
     );
 
     let chart_homes_Status = Chart.getChart('HomesChart');
-    if (chart_homes_Status != undefined) {
+    if (chart_homes_Status !== undefined) {
       chart_homes_Status.destroy();
     }
 
@@ -292,10 +292,10 @@ export default function Management_Dashboard() {
   };
 
   const summaryData = [
-    { value: 20, title: 'Falls', subtitle: 'Niagra LTC', linkTo: '/dashboard' },
-    { value: 18, title: 'Falls', subtitle: 'Mill creek LTC', linkTo: '/dashboard' },
-    { value: 10, title: 'Falls', subtitle: 'The Wellington LTC', linkTo: '/dashboard' },
-    { value: 15, title: 'Falls', subtitle: 'Ina Graftin LTC', linkTo: '/dashboard' },
+    { value: 20, title: 'Falls', subtitle: 'Niagra LTC', linkTo: '/niagara-ltc' },
+    { value: 18, title: 'Falls', subtitle: 'Mill creek LTC', linkTo: '/mill-creek-care' },
+    { value: 10, title: 'Falls', subtitle: 'The Wellington LTC', linkTo: '/the-wellington-ltc' },
+    { value: 15, title: 'Falls', subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
   ];
 
   return (
