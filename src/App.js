@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-do
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import ManagementDashboard from './pages/ManagementDashboard';
-import TestFirebase from './components/TestFirebase';
+// import TestFirebase from './components/TestFirebase';
 
 function App() {
   return (
