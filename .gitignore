@@ -4,3 +4,4 @@ node_modules
 .netlify
 /src/firebase.js
 /src/components/TestFirebase.js
+.env
