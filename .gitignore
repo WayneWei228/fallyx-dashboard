@@ -2,6 +2,5 @@ node_modules
 .prettierrc.js
 # Local Netlify folder
 .netlify
-/src/firebase.js
 /src/components/TestFirebase.js
 .env
