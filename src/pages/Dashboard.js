@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Chart } from 'chart.js/auto';
 import '../styles/Dashboard.css';
-import { initializeApp } from 'firebase/app';
-import { get, getDatabase, ref, onValue, update } from 'firebase/database';
+import { ref, update } from 'firebase/database';
 import { db } from '../firebase';
 import * as XLSX from 'xlsx/xlsx.mjs';
 import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
-import Popup from 'reactjs-popup';
 
-export default function Dashboard(props) {
+export default function Dashboard() {
   const navigate = useNavigate();
   const months = [
     'January',
@@ -25,15 +23,14 @@ export default function Dashboard(props) {
     'November',
     'December',
   ];
-  const [dbData, setDBData] = useState([]);
-  const [analysisData, setAnalysisData] = useState([]);
+  // const [dbData, setDBData] = useState([]);
+  // const [analysisData, setAnalysisData] = useState([]);
   const [goal, setGoal] = useState(0);
   const [chart, setChart] = useState();
   const [analysisChart, setAnalysisChart] = useState();
   const [gaugeChart, setGaugeChart] = useState(true);
-  const [alert, setAlert] = useState(false);
-  const [hirFalls, setHIRFalls] = useState(5);
-
+  // const [alert, setAlert] = useState(false);
+  // const [hirFalls, setHIRFalls] = useState(5);
 
   useEffect(() => {
     // const dataRef = ref(db, 'data/');
@@ -269,7 +266,7 @@ export default function Dashboard(props) {
     setGoal(newGoal);
   };
 
-  const updateClickHandler = () => {};
+  // const updateClickHandler = () => {};
 
   const updateAnalysisChart = async () => {
     const analysisType = document.getElementById('fallsAnalysisType').value;
@@ -469,7 +466,7 @@ export default function Dashboard(props) {
           </tr>
         </thead>
         <tbody id="fallsTableBody">
-          {analysisData.map((item, i) => {
+          {analysisData.map((item) => {
             return (
               <tr>
                 <td>{item.date}</td>

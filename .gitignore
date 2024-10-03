@@ -4,3 +4,4 @@ node_modules
 .netlify
 /src/components/TestFirebase.js
 .env
+.DS_Store

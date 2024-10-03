@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // 引入Link组件
+// import { Link } from 'react-router-dom'; // 引入Link组件
 import '../styles/SummaryCard.css';
 
 const SummaryCard = ({ value, title, subtitle, linkTo }) => {

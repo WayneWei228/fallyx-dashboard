@@ -161,7 +161,7 @@ export default function Management_Dashboard() {
   }, []);
 
   const updateFallsChart = async () => {
-    const header = document.getElementById('fallsHeader');
+    // const header = document.getElementById('fallsHeader');
     const timeRange = document.getElementById('fallsTimeRange').value;
     let newData = [];
 
@@ -223,7 +223,7 @@ export default function Management_Dashboard() {
   };
 
   const updateHomesChart = async () => {
-    const header = document.getElementById('homesHeader');
+    // const header = document.getElementById('homesHeader');
     const timeRange = document.getElementById('homesTimeRange').value;
     let newData = [];
 

@@ -1,66 +1,74 @@
-import React from 'react';
-import { get, getDatabase, ref } from 'firebase/database';
-import { db } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-
-import '../styles/Dashboard.css';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+import { get, ref } from 'firebase/database';
+import { db } from '../firebase'; 
+import '../styles/Login.css'; 
+import fallyxLogo from '../assets/fallyxlogo.jpeg'; 
 
 export default function Login() {
-  const [username, setUsername] = React.useState();
-  const [password, setPassword] = React.useState();
-  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  // const navigate = useNavigate();
 
-  const login = async () => {
-    const usersRef = ref(db, 'users/');
-    const snapshot = await get(usersRef);
-    const users = snapshot.val();
-    console.log(users);
-    
-    if (users) {
-      let userFound = false;
-      Object.values(users).forEach((user) => {
-        if (user.username === username && user.password === password) {
-          userFound = true;
-          console.log('Login successful');
+  const handleLogin = async () => {
+    try {
+      const usersRef = ref(db, 'users/');
+      const snapshot = await get(usersRef);
+      const users = snapshot.val();
+
+      if (users) {
+        const user = Object.values(users).find((user) => user.email === username && user.password === password);
+        if (user) {
+          // Store login state in localStorage
           localStorage.setItem('isLoggedIn', 'true');
-          navigate('/managementDashboard');
+          localStorage.setItem('loggedInUser', username);
+
+          window.location.href = user.redirect;
+        } else {
+          setErrorMessage('Invalid email or password');
         }
-      });
-      if (!userFound) {
-        console.log('Invalid username or password');
+      } else {
+        setErrorMessage('No users found');
       }
-    } else {
-      console.log('No users found');
+    } catch (error) {
+      setErrorMessage('Error logging in');
+      console.error(error);
     }
   };
 
-
-  
   return (
-    <div className="dashboard">
-      <div className="gauge-container">
-        <h1>Login</h1>
-        <h4>Username</h4>
+    <div className="login-container">
+      <img src={fallyxLogo} alt="Logo" className="logoLogin" />
+      <h2 className="login-title">Falls Analysis Tool Login</h2>
+
+      <div className="login-input-group">
+        <label htmlFor="login-email">Username</label>
         <input
+          id="login-email"
           type="text"
-          onChange={(e) => {
-            setUsername(e.target.value);
-          }}
-        ></input>
-        <h4>Password</h4>
-        <input
-          type="password"
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
-        ></input>
-        <br></br>
-        <br></br>
-        <button className="update-button" onClick={login}>
-          Login
-        </button>
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Enter your username"
+        />
       </div>
+
+      <div className="login-input-group">
+        <label htmlFor="login-password">Password</label>
+        <input
+          id="login-password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
+        />
+      </div>
+
+      {errorMessage && <p className="login-error-message">{errorMessage}</p>}
+
+      <button className="login-button" onClick={handleLogin}>
+        Login
+      </button>
     </div>
   );
 }
