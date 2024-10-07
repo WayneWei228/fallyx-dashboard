@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Chart } from 'chart.js/auto';
+import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import '../styles/Dashboard.css';
 import { ref, update } from 'firebase/database';
 import { db } from '../firebase';
 import * as XLSX from 'xlsx/xlsx.mjs';
 import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
+import { threeMonthData } from '../data/TableData';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -23,71 +24,108 @@ export default function Dashboard() {
     'November',
     'December',
   ];
-  // const [dbData, setDBData] = useState([]);
-  // const [analysisData, setAnalysisData] = useState([]);
+
+  // State variables
+  const [dbData, setDBData] = useState([]);
   const [goal, setGoal] = useState(0);
-  const [chart, setChart] = useState();
-  const [analysisChart, setAnalysisChart] = useState();
+  const [gaugeChartData, setGaugeChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  const [gaugeChartOptions, setGaugeChartOptions] = useState({});
+  const [lineChartData, setLineChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  const [lineChartOptions, setLineChartOptions] = useState({});
+  const [analysisChartData, setAnalysisChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  const [analysisChartOptions, setAnalysisChartOptions] = useState({});
   const [gaugeChart, setGaugeChart] = useState(true);
-  // const [alert, setAlert] = useState(false);
-  // const [hirFalls, setHIRFalls] = useState(5);
+  const [hirFalls, setHIRFalls] = useState(5);
+  const [fallsTimeRange, setFallsTimeRange] = useState('current');
+  const [analysisType, setAnalysisType] = useState('timeOfDay');
+  const [analysisTimeRange, setAnalysisTimeRange] = useState('current');
+  const [analysisHeaderText, setAnalysisHeaderText] = useState('Falls by Time of Day');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
-    // const dataRef = ref(db, 'data/');
+    // Initialize data
+    setDBData(
+      threeMonthData
+      // Add other data entries here...
+    );
 
-    // onValue(
-    //   dataRef,
-    //   (snapshot) => {
-    //     setDBData(snapshot.val());
-    //     if (!!snapshot.val()) {
-    //       console.log(snapshot.val());
-    //     }
-    //   },
-    //   {
-    //     onlyOnce: true,
-    //   }
-    // );
+    setGoal(20);
+    setHIRFalls(7);
 
-    // const goalRef = ref(db, 'falls_goal/');
+    // Initialize gauge chart data and options
+    setGaugeChartData({
+      datasets: [
+        {
+          data: [0, 20],
+          backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(200, 200, 200, 0.2)'],
+          circumference: 180,
+          rotation: 270,
+        },
+      ],
+    });
 
-    // onValue(
-    //   goalRef,
-    //   (snapshot) => {
-    //     console.log(snapshot.val());
-    //     setGoal(snapshot.val());
-    //     if (!!snapshot.val()) {
-    //       console.log(snapshot.val());
-    //     }
-    //   },
-    //   {
-    //     onlyOnce: true,
-    //   }
-    // );
+    setGaugeChartOptions({
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '80%',
+      plugins: {
+        tooltip: { enabled: false },
+        legend: { display: false },
+      },
+    });
 
-    // const analysisRef = ref(db, 'tracking_table_data/');
+    // Initialize analysis chart data and options
+    setAnalysisChartData({
+      labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+      datasets: [
+        {
+          label: 'Number of Falls',
+          data: [2, 2, 2, 1],
+          backgroundColor: 'rgba(76, 175, 80, 0.6)',
+          borderColor: 'rgb(76, 175, 80)',
+          borderWidth: 1,
+        },
+      ],
+    });
 
-    // onValue(
-    //   analysisRef,
-    //   (snapshot) => {
-    //     setAnalysisData(snapshot.val());
-    //     if (!!snapshot.val()) {
-    //       console.log(snapshot.val());
-    //     }
-    //   },
-    //   {
-    //     onlyOnce: true,
-    //   }
-    // );
+    setAnalysisChartOptions({
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,
+          },
+        },
+      },
+    });
+  }, []);
 
-    let chartStatus = Chart.getChart('gaugeChart');
-    if (chartStatus != undefined) {
-      chartStatus.destroy();
-    }
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
 
-    setChart(
-      new Chart(document.getElementById('gaugeChart'), {
-        type: 'doughnut',
-        data: {
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = dbData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const updateFallsChart = () => {
+    const timeRange = fallsTimeRange;
+
+    switch (timeRange) {
+      case 'current':
+        setGaugeChart(true);
+        setGaugeChartData({
           datasets: [
             {
               data: [7, 13],
@@ -96,159 +134,48 @@ export default function Dashboard() {
               rotation: 270,
             },
           ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '80%',
-          plugins: {
-            tooltip: { enabled: false },
-            legend: { display: false },
-          },
-        },
-      })
-    );
-
-    chartStatus = Chart.getChart('fallsAnalysisChart');
-    if (chartStatus != undefined) {
-      chartStatus.destroy();
-    }
-
-    setAnalysisChart(
-      new Chart(document.getElementById('fallsAnalysisChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+        });
+        break;
+      case '3months':
+        setGaugeChart(false);
+        setLineChartData({
+          labels: months.slice(2, 5),
           datasets: [
             {
               label: 'Number of Falls',
-              data: [2, 2, 2, 1],
-              backgroundColor: 'rgba(76, 175, 80, 0.6)',
+              data: [2, 3, 4],
               borderColor: 'rgb(76, 175, 80)',
-              borderWidth: 1,
+              tension: 0.1,
             },
           ],
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1,
-              },
-            },
-          },
-        },
-      })
-    );
-  }, []);
-
-  const updateFallsChart = async () => {
-    const timeRange = document.getElementById('fallsTimeRange').value;
-
-    switch (timeRange) {
-      case 'current':
-        await setGaugeChart(true);
-        chart.destroy();
-        setChart(
-          new Chart(document.getElementById('gaugeChart'), {
-            type: 'doughnut',
-            data: {
-              datasets: [
-                {
-                  data: [7, 13],
-                  backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(200, 200, 200, 0.2)'],
-                  circumference: 180,
-                  rotation: 270,
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              cutout: '80%',
-              plugins: {
-                tooltip: { enabled: false },
-                legend: { display: false },
-              },
-            },
-          })
-        );
-        break;
-      case '3months':
-        await setGaugeChart(false);
-        chart.destroy();
-        setChart(
-          new Chart(document.getElementById('fallsLineChart').getContext('2d'), {
-            type: 'line',
-            data: {
-              labels: months.slice(2, 5), // Will be populated based on selected time range
-              datasets: [
-                {
-                  label: 'Number of Falls',
-                  data: dbData.slice(3, 6), // Will be populated based on selected time range
-                  borderColor: 'rgb(76, 175, 80)',
-                  tension: 0.1,
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    stepSize: 1,
-                  },
-                },
-              },
-            },
-          })
-        );
+        });
         break;
       case '6months':
-        await setGaugeChart(false);
-        chart.destroy();
-        setChart(
-          new Chart(document.getElementById('fallsLineChart').getContext('2d'), {
-            type: 'line',
-            data: {
-              labels: months.slice(2, 8), // Will be populated based on selected time range
-              datasets: [
-                {
-                  label: 'Number of Falls',
-                  data: dbData.slice(3, 9), // Will be populated based on selected time range
-                  borderColor: 'rgb(76, 175, 80)',
-                  tension: 0.1,
-                },
-              ],
+        setGaugeChart(false);
+        setLineChartData({
+          labels: months.slice(2, 8),
+          datasets: [
+            {
+              label: 'Number of Falls',
+              data: [1, 2, 3, 4, 3, 2],
+              borderColor: 'rgb(76, 175, 80)',
+              tension: 0.1,
             },
-            options: {
-              responsive: true,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    stepSize: 1,
-                  },
-                },
-              },
-            },
-          })
-        );
+          ],
+        });
+        break;
+      default:
         break;
     }
   };
 
   const downloadTable = () => {
-    var table = document.getElementById('fallsTable');
-    var wb = XLSX.utils.table_to_book(table, { sheet: 'Falls Tracking' });
+    const table = document.getElementById('fallsTable');
+    const wb = XLSX.utils.table_to_book(table, { sheet: 'Falls Tracking' });
     XLSX.writeFile(wb, 'Falls_Tracking_August.xlsx');
   };
 
   const updateFalls = () => {
-    setAlert(false);
     let newGoal;
 
     do {
@@ -266,108 +193,81 @@ export default function Dashboard() {
     setGoal(newGoal);
   };
 
-  // const updateClickHandler = () => {};
-
-  const updateAnalysisChart = async () => {
-    const analysisType = document.getElementById('fallsAnalysisType').value;
-    const header = document.getElementById('analysisHeader');
-    const timeRange = document.getElementById('analysisTimeRange').value;
+  const updateAnalysisChart = () => {
     let newLabels = [];
     let newData = [];
 
-    const multiplier = timeRange === 'current' ? 1 : timeRange === '3months' ? 3 : 6;
+    const multiplier = analysisTimeRange === 'current' ? 1 : analysisTimeRange === '3months' ? 3 : 6;
 
     switch (analysisType) {
       case 'timeOfDay':
-        header.textContent = 'Falls by Time of Day';
+        setAnalysisHeaderText('Falls by Time of Day');
         newLabels = ['Morning', 'Afternoon', 'Evening', 'Night'];
         newData = [2, 2, 2, 1].map((val) => val * multiplier);
         break;
       case 'location':
-        header.textContent = 'Falls by Location';
+        setAnalysisHeaderText('Falls by Location');
         newLabels = ['Bedroom', 'Bathroom', 'Common Area', 'Hallway'];
         newData = [3, 2, 1, 1].map((val) => val * multiplier);
         break;
       case 'injuries':
-        header.textContent = 'Falls by Injury Severity';
+        setAnalysisHeaderText('Falls by Injury Severity');
         newLabels = ['No Injury', 'Minor', 'Moderate', 'Severe'];
         newData = [4, 2, 1, 0].map((val) => val * multiplier);
         break;
       case 'hir':
-        switch (timeRange) {
-          case 'current':
-            header.textContent = 'Falls by HIR';
-            newLabels = ['September'];
-            newData = [2];
-            break;
-          case '3months':
-            header.textContent = 'Falls by HIR';
-            newLabels = ['July', 'August', 'September'];
-            newData = [2, 1, 2];
-            break;
-          case '6months':
-            header.textContent = 'Falls by HIR';
-            newLabels = ['April', 'May', 'June', 'July', 'August', 'September'];
-            newData = [1, 2, 3, 0, 1, 2];
-            break;
+        setAnalysisHeaderText('Falls by HIR');
+        if (analysisTimeRange === 'current') {
+          newLabels = ['September'];
+          newData = [2];
+        } else if (analysisTimeRange === '3months') {
+          newLabels = ['July', 'August', 'September'];
+          newData = [2, 1, 2];
+        } else {
+          newLabels = ['April', 'May', 'June', 'July', 'August', 'September'];
+          newData = [1, 2, 3, 0, 1, 2];
         }
         break;
       case 'recurring':
-        switch (timeRange) {
-          case 'current':
-            header.textContent = 'Falls by HIR';
-            newLabels = ['September'];
-            newData = [1];
-            break;
-          case '3months':
-            header.textContent = 'Falls by HIR';
-            newLabels = ['July', 'August', 'September'];
-            newData = [0, 1, 2];
-            break;
-          case '6months':
-            header.textContent = 'Falls by HIR';
-            newLabels = ['April', 'May', 'June', 'July', 'August', 'September'];
-            newData = [0, 1, 4, 3, 1, 2];
-            break;
+        setAnalysisHeaderText('Residents with Recurring Falls');
+        if (analysisTimeRange === 'current') {
+          newLabels = ['September'];
+          newData = [1];
+        } else if (analysisTimeRange === '3months') {
+          newLabels = ['July', 'August', 'September'];
+          newData = [0, 1, 2];
+        } else {
+          newLabels = ['April', 'May', 'June', 'July', 'August', 'September'];
+          newData = [0, 1, 4, 3, 1, 2];
         }
+        break;
+      default:
         break;
     }
 
-    analysisChart.destroy();
-
-    setAnalysisChart(
-      new Chart(document.getElementById('fallsAnalysisChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: newLabels,
-          datasets: [
-            {
-              label: 'Number of Falls',
-              data: newData,
-              backgroundColor: 'rgba(76, 175, 80, 0.6)',
-              borderColor: 'rgb(76, 175, 80)',
-              borderWidth: 1,
-            },
-          ],
+    setAnalysisChartData({
+      labels: newLabels,
+      datasets: [
+        {
+          label: 'Number of Falls',
+          data: newData,
+          backgroundColor: 'rgba(76, 175, 80, 0.6)',
+          borderColor: 'rgb(76, 175, 80)',
+          borderWidth: 1,
         },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1,
-              },
-            },
-          },
-        },
-      })
-    );
+      ],
+    });
   };
 
   const logout = () => {
     navigate('/login');
   };
+
+  useEffect(() => {
+    updateFallsChart();
+    updateAnalysisChart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fallsTimeRange, analysisType, analysisTimeRange]);
 
   return (
     <div className="dashboard">
@@ -379,10 +279,15 @@ export default function Dashboard() {
       <div className="chart-container">
         <div className="chart">
           <div className="gauge-container">
-            <h2 style={{ paddingTop: '7.5px' }} id="Header">
-              Falls Overview
-            </h2>
-            <select id="fallsTimeRange" onChange={updateFallsChart}>
+            <h2 style={{ paddingTop: '7.5px' }}>Falls Overview</h2>
+            <select
+              id="fallsTimeRange"
+              value={fallsTimeRange}
+              onChange={(e) => {
+                setFallsTimeRange(e.target.value);
+                updateFallsChart();
+              }}
+            >
               <option value="current">This Month</option>
               <option value="3months">Past 3 Months</option>
               <option value="6months">Past 6 Months</option>
@@ -390,7 +295,7 @@ export default function Dashboard() {
             {gaugeChart ? (
               <div id="gaugeContainer">
                 <div className="gauge">
-                  <canvas id="gaugeChart"></canvas>
+                  {gaugeChartData.datasets.length > 0 && <Doughnut data={gaugeChartData} options={gaugeChartOptions} />}
                   <div className="gauge-value">7</div>
                   <div className="gauge-label">falls this month</div>
                   <div className="gauge-goal">
@@ -398,46 +303,58 @@ export default function Dashboard() {
                   </div>
                   <br />
                   <div className="gauge-scale">
-                    <span>2</span>
+                    <span>0</span>
                     <span>20</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div id="lineChartContainer">
-                <canvas id="fallsLineChart"></canvas>
+                {lineChartData.datasets.length > 0 && <Line data={lineChartData} options={lineChartOptions} />}
               </div>
             )}
             <br />
             <br />
-            {gaugeChart ? (
+            {gaugeChart && (
               <div>
                 <button className="update-button" id="update-button" onClick={updateFalls}>
                   Update Falls Goal
                 </button>
               </div>
-            ) : (
-              <></>
             )}
           </div>
         </div>
 
         <div className="chart">
-          <h2 id="analysisHeader">Falls by Time of Day</h2>
-          <h4 id="analysisHeader">Falls by HIR: {hirFalls}</h4>
-          <select id="fallsAnalysisType" onChange={updateAnalysisChart}>
+          <h2>{analysisHeaderText}</h2>
+          <h4>Falls by HIR: {hirFalls}</h4>
+          <select
+            id="fallsAnalysisType"
+            value={analysisType}
+            onChange={(e) => {
+              setAnalysisType(e.target.value);
+              updateAnalysisChart();
+            }}
+          >
             <option value="timeOfDay">Time of Day</option>
             <option value="location">Location</option>
             <option value="injuries">Injuries</option>
             <option value="hir">Falls by HIR</option>
             <option value="recurring">Residents w/ Recurring Falls</option>
           </select>
-          <select id="analysisTimeRange" onChange={updateAnalysisChart}>
+          <select
+            id="analysisTimeRange"
+            value={analysisTimeRange}
+            onChange={(e) => {
+              setAnalysisTimeRange(e.target.value);
+              updateAnalysisChart();
+            }}
+          >
             <option value="current">Current Month</option>
             <option value="3months">Past 3 Months</option>
             <option value="6months">Past 6 Months</option>
           </select>
-          <canvas id="fallsAnalysisChart"></canvas>
+          {analysisChartData.datasets.length > 0 && <Bar data={analysisChartData} options={analysisChartOptions} />}
         </div>
       </div>
 
@@ -461,36 +378,43 @@ export default function Dashboard() {
             <th>POA Contacted</th>
             <th>Physician Ref</th>
             <th>Incident Report Written</th>
-            <th>3 Post Fall Notes in 72 Hours</th>
+            <th>
+              3 Post Fall Notes<br></br> in 72 Hours
+            </th>
             <th>Interventions</th>
           </tr>
         </thead>
         <tbody id="fallsTableBody">
-          {analysisData.map((item) => {
-            return (
-              <tr>
-                <td>{item.date}</td>
-                <td>{item.time}</td>
-                <td>{item.location}</td>
-                <td>{item.cause}</td>
-                <td>{item.hir}</td>
-                <td>{item.injury}</td>
-                <td>{item.hospital}</td>
-                <td>{item.ptRef}</td>
-                <td>{item.poaContacted}</td>
-                <td>{item.physicianRef}</td>
-                <td>
-                  <input type="checkbox" checked={item.incidentReportWritten} disabled></input>
-                </td>
-                <td>
-                  <input type="checkbox" checked={item.postFallNotes} disabled></input>
-                </td>
-                <td>{item.review}</td>
-              </tr>
-            );
-          })}
+          {currentItems.map((item, i) => (
+            <tr key={i}>
+              <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
+              <td>{item.time}</td>
+              <td>{item.location}</td>
+              <td>{item.cause}</td>
+              <td>{item.hir}</td>
+              <td>{item.injury}</td>
+              <td>{item.hospital}</td>
+              <td>{item.ptRef}</td>
+              <td>{item.poaContacted}</td>
+              <td>{item.physicianRef}</td>
+              <td>
+                <input type="checkbox" checked={item.incidentReportWritten} disabled />
+              </td>    
+              <td>
+                <input type="checkbox" checked={item.postFallNotes} disabled />
+              </td>
+              <td>{item.review}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
+      <div className="pagination">
+        {Array.from({ length: Math.ceil(dbData.length / itemsPerPage) }, (_, index) => (
+          <button key={index} onClick={() => handlePageChange(index + 1)}>
+            {index + 1}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
