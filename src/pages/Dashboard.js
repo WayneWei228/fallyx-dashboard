@@ -6,7 +6,10 @@ import { db } from '../firebase';
 import * as XLSX from 'xlsx/xlsx.mjs';
 import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
-import { threeMonthData } from '../data/TableData';
+import { threeData } from '../data/TableData';
+import { sampleData } from '../data/sampleData';
+import csvFile from '../data/demo.csv';
+import * as Papa from 'papaparse';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -26,7 +29,8 @@ export default function Dashboard() {
   ];
 
   // State variables
-  const [dbData, setDBData] = useState([]);
+  const [threeMonthData, setThreeMonthData] = useState([]);
+  const [tableData, setTableData] = useState([]);
   const [goal, setGoal] = useState(0);
   const [gaugeChartData, setGaugeChartData] = useState({
     labels: [],
@@ -48,25 +52,30 @@ export default function Dashboard() {
   const [fallsTimeRange, setFallsTimeRange] = useState('current');
   const [analysisType, setAnalysisType] = useState('timeOfDay');
   const [analysisTimeRange, setAnalysisTimeRange] = useState('current');
+  const [analysisUnit, setAnalysisUnit] = useState('allUnits');
+
   const [analysisHeaderText, setAnalysisHeaderText] = useState('Falls by Time of Day');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
 
   useEffect(() => {
     // Initialize data
-    setDBData(
-      threeMonthData
-      // Add other data entries here...
-    );
 
-    setGoal(20);
+    // setTableData(
+    //   sampleData
+    //   // Add other data entries here...
+    // );
+
+    setThreeMonthData(threeData);
+
+    setGoal(25);
     setHIRFalls(7);
 
     // Initialize gauge chart data and options
     setGaugeChartData({
       datasets: [
         {
-          data: [0, 20],
+          data: [0, 20], // TODO:
           backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(200, 200, 200, 0.2)'],
           circumference: 180,
           rotation: 270,
@@ -86,11 +95,11 @@ export default function Dashboard() {
 
     // Initialize analysis chart data and options
     setAnalysisChartData({
-      labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+      labels: ['Morning', 'Afternoon', 'Evening'],
       datasets: [
         {
           label: 'Number of Falls',
-          data: [2, 2, 2, 1],
+          data: [1, 1, 1], // TODO:
           backgroundColor: 'rgba(76, 175, 80, 0.6)',
           borderColor: 'rgb(76, 175, 80)',
           borderWidth: 1,
@@ -108,8 +117,41 @@ export default function Dashboard() {
           },
         },
       },
+      // TODO: delete the legend
+      options: {
+        legend: {
+          display: false,
+        },
+        tooltips: {
+          callbacks: {
+            label: function (tooltipItem) {
+              console.log(tooltipItem);
+              return tooltipItem.yLabel;
+            },
+          },
+        },
+      },
     });
+
+    fetch(csvFile)
+      .then((response) => response.text())
+      .then((text) => {
+        // 使用 PapaParse 解析 CSV 数据
+        Papa.parse(text, {
+          header: true,
+          skipEmptyLines: true,
+          // dynamicTyping: true,
+          complete: function (results) {
+            console.log('Parsed Data:', results.data); // 可选：查看解析结果
+            setTableData(results.data);
+          },
+        });
+      });
   }, []);
+
+  function countTotalFalls() {
+    return tableData.length;
+  }
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -117,10 +159,23 @@ export default function Dashboard() {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = dbData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = tableData.slice(indexOfFirstItem, indexOfLastItem);
 
   const updateFallsChart = () => {
     const timeRange = fallsTimeRange;
+
+    setLineChartOptions({
+      scales: {
+        y: {
+          beginAtZero: true,
+          min: 0,
+          max: 55,
+          ticks: {
+            stepSize: 5,
+          },
+        },
+      },
+    });
 
     switch (timeRange) {
       case 'current':
@@ -138,12 +193,28 @@ export default function Dashboard() {
         break;
       case '3months':
         setGaugeChart(false);
+        let newData = [0, 0, 0];
+        // Aggregate falls counts for the past three months
+        threeMonthData.forEach((item) => {
+          const month = item.date.split('-')[1];
+          switch (month) {
+            case 'Jul':
+              newData[0]++;
+              break;
+            case 'Aug':
+              newData[1]++;
+              break;
+            case 'Sep':
+              newData[2]++;
+              break;
+          }
+        });
         setLineChartData({
-          labels: months.slice(2, 5),
+          labels: ['July', 'August', 'September'],
           datasets: [
             {
               label: 'Number of Falls',
-              data: [2, 3, 4],
+              data: newData,
               borderColor: 'rgb(76, 175, 80)',
               tension: 0.1,
             },
@@ -156,8 +227,8 @@ export default function Dashboard() {
           labels: months.slice(2, 8),
           datasets: [
             {
-              label: 'Number of Falls',
-              data: [1, 2, 3, 4, 3, 2],
+              label: ['April', 'May', 'June', 'July', 'August', 'September'],
+              data: [45, 36, 30, 46, 43, 43],
               borderColor: 'rgb(76, 175, 80)',
               tension: 0.1,
             },
@@ -193,55 +264,163 @@ export default function Dashboard() {
     setGoal(newGoal);
   };
 
+  function countFallsByTimeOfDay(data) {
+    var timeOfDayCounts = { Morning: 0, Evening: 0, Night: 0 };
+
+    data.forEach((fall) => {
+      var shift = getTimeShift(fall.time);
+      timeOfDayCounts[shift]++;
+    });
+
+    return timeOfDayCounts;
+  }
+
+  function countFallsByExactInjury(data) {
+    var injuryCounts = {};
+
+    data.forEach((fall) => {
+      var injury = fall.injury;
+
+      if (injuryCounts[injury]) {
+        injuryCounts[injury]++;
+      } else {
+        injuryCounts[injury] = 1;
+      }
+    });
+
+    return injuryCounts;
+  }
+
+  function countFallsByLocation(data) {
+    var locationCounts = {};
+    data.forEach((fall) => {
+      if (locationCounts[fall.location]) {
+        locationCounts[fall.location]++;
+      } else {
+        locationCounts[fall.location] = 1;
+      }
+    });
+    return locationCounts;
+  }
+
+  function countFallsByHIR(data) {
+    var hirCount = 0;
+
+    data.forEach((fall) => {
+      if (fall.hir.toLowerCase() === 'yes') {
+        hirCount++;
+      }
+    });
+
+    return hirCount;
+  }
+
+  function getMonthFromTimeRange(timeRange) {
+    // Example logic for determining the month label
+    // Replace this logic with the actual month logic you are using
+    var currentMonth = 'August 2024'; // You can dynamically determine this based on the current time or input data
+    if (timeRange === '3months') {
+      return 'June - August 2024';
+    } else if (timeRange === '6months') {
+      return 'March - August 2024';
+    } else {
+      return currentMonth;
+    }
+  }
+
+  function getTimeShift(fallTime) {
+    var parts = fallTime.split(':');
+    var hours = parseInt(parts[0], 10);
+    var minutes = parseInt(parts[1], 10);
+
+    // Convert time to minutes since midnight for easier comparison
+    var totalMinutes = hours * 60 + minutes;
+
+    // Determine the shift based on time ranges
+    if (totalMinutes >= 390 && totalMinutes <= 870) {
+      // 6:30 AM to 2:30 PM
+      return 'Morning';
+    } else if (totalMinutes >= 871 && totalMinutes <= 1350) {
+      // 2:31 PM to 10:30 PM
+      return 'Evening';
+    } else {
+      // 10:31 PM to 6:30 AM
+      return 'Night';
+    }
+  }
+
+  function countResidentsWithRecurringFalls(data) {
+    var residentFallCounts = {};
+
+    // Count falls for each resident
+    data.forEach((fall) => {
+      var residentName = fall.name;
+      if (residentFallCounts[residentName]) {
+        residentFallCounts[residentName]++;
+      } else {
+        residentFallCounts[residentName] = 1;
+      }
+    });
+
+    // Only include residents with more than one fall
+    var recurringFalls = {};
+    for (var resident in residentFallCounts) {
+      if (residentFallCounts[resident] > 1) {
+        recurringFalls[resident] = residentFallCounts[resident];
+      }
+    }
+
+    return recurringFalls;
+  }
+
   const updateAnalysisChart = () => {
+    var selectedUnit = analysisUnit;
+    var filteredData = analysisTimeRange === '3months' ? threeMonthData : tableData;
+
+    if (selectedUnit !== 'allUnits') {
+      filteredData = filteredData.filter(
+        (fall) => fall.homeUnit.trim().toLowerCase() === selectedUnit.trim().toLowerCase()
+      );
+    }
+
     let newLabels = [];
     let newData = [];
-
-    const multiplier = analysisTimeRange === 'current' ? 1 : analysisTimeRange === '3months' ? 3 : 6;
 
     switch (analysisType) {
       case 'timeOfDay':
         setAnalysisHeaderText('Falls by Time of Day');
-        newLabels = ['Morning', 'Afternoon', 'Evening', 'Night'];
-        newData = [2, 2, 2, 1].map((val) => val * multiplier);
+        newLabels = ['Morning', 'Evening', 'Night'];
+        var timeOfDayCounts = countFallsByTimeOfDay(filteredData);
+        newData = [timeOfDayCounts.Morning, timeOfDayCounts.Evening, timeOfDayCounts.Night];
         break;
+
       case 'location':
         setAnalysisHeaderText('Falls by Location');
-        newLabels = ['Bedroom', 'Bathroom', 'Common Area', 'Hallway'];
-        newData = [3, 2, 1, 1].map((val) => val * multiplier);
+        var locationCounts = countFallsByLocation(filteredData);
+        newLabels = Object.keys(locationCounts);
+        newData = Object.values(locationCounts);
         break;
+
       case 'injuries':
-        setAnalysisHeaderText('Falls by Injury Severity');
-        newLabels = ['No Injury', 'Minor', 'Moderate', 'Severe'];
-        newData = [4, 2, 1, 0].map((val) => val * multiplier);
+        setAnalysisHeaderText('Falls by Injury Description');
+        var injuryCounts = countFallsByExactInjury(filteredData);
+        newLabels = Object.keys(injuryCounts);
+        newData = Object.values(injuryCounts);
         break;
-      case 'hir':
-        setAnalysisHeaderText('Falls by HIR');
-        if (analysisTimeRange === 'current') {
-          newLabels = ['September'];
-          newData = [2];
-        } else if (analysisTimeRange === '3months') {
-          newLabels = ['July', 'August', 'September'];
-          newData = [2, 1, 2];
-        } else {
-          newLabels = ['April', 'May', 'June', 'July', 'August', 'September'];
-          newData = [1, 2, 3, 0, 1, 2];
-        }
+
+      // TODO: Bug: graph no change
+      case 'HIR':
+        setAnalysisHeaderText('High Injury Risk (HIR) Falls');
+        var hirCount = countFallsByHIR(filteredData);
+        newLabels = [getMonthFromTimeRange(analysisTimeRange)];
+        newData = [hirCount];
         break;
-      case 'recurring':
+
+      case 'residents':
         setAnalysisHeaderText('Residents with Recurring Falls');
-        if (analysisTimeRange === 'current') {
-          newLabels = ['September'];
-          newData = [1];
-        } else if (analysisTimeRange === '3months') {
-          newLabels = ['July', 'August', 'September'];
-          newData = [0, 1, 2];
-        } else {
-          newLabels = ['April', 'May', 'June', 'July', 'August', 'September'];
-          newData = [0, 1, 4, 3, 1, 2];
-        }
-        break;
-      default:
+        var recurringFalls = countResidentsWithRecurringFalls(filteredData);
+        newLabels = Object.keys(recurringFalls);
+        newData = Object.values(recurringFalls);
         break;
     }
 
@@ -249,7 +428,6 @@ export default function Dashboard() {
       labels: newLabels,
       datasets: [
         {
-          label: 'Number of Falls',
           data: newData,
           backgroundColor: 'rgba(76, 175, 80, 0.6)',
           borderColor: 'rgb(76, 175, 80)',
@@ -267,10 +445,33 @@ export default function Dashboard() {
     updateFallsChart();
     updateAnalysisChart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fallsTimeRange, analysisType, analysisTimeRange]);
+  }, [fallsTimeRange, analysisType, analysisTimeRange, analysisUnit]);
+
+  // Function to parse CSV text into an array of objects
+  const parseCSV = (text) => {
+    const lines = text.split('\n').filter((line) => line.trim().length > 0); // Remove empty lines
+    const headers = lines[0].split('\t').map((header) => header.trim()); // Split by tab and trim headers
+    const data = lines.slice(1).map((line) => {
+      const values = line.split('\t').map((value) => value.trim()); // Split by tab and trim values
+      const item = {};
+      headers.forEach((header, index) => {
+        let value = values[index] || 'Unknown';
+
+        // Convert boolean fields represented by TRUE/FALSE in CSV
+        if (value.toLowerCase() === 'true') value = true;
+        if (value.toLowerCase() === 'false') value = false;
+
+        item[header] = value;
+      });
+      return item;
+    });
+
+    return data.filter((item) => Object.keys(item).length > 0);
+  };
 
   return (
     <div className="dashboard">
+      {/* TODO */}
       <h1>The Wellington LTC Falls Dashboard</h1>
       <button className="logout-button" onClick={logout}>
         Log Out
@@ -296,7 +497,7 @@ export default function Dashboard() {
               <div id="gaugeContainer">
                 <div className="gauge">
                   {gaugeChartData.datasets.length > 0 && <Doughnut data={gaugeChartData} options={gaugeChartOptions} />}
-                  <div className="gauge-value">7</div>
+                  <div className="gauge-value">3</div>
                   <div className="gauge-label">falls this month</div>
                   <div className="gauge-goal">
                     Goal: <span id="fallGoal">{goal}</span>
@@ -304,7 +505,7 @@ export default function Dashboard() {
                   <br />
                   <div className="gauge-scale">
                     <span>0</span>
-                    <span>20</span>
+                    <span>25</span>
                   </div>
                 </div>
               </div>
@@ -327,7 +528,7 @@ export default function Dashboard() {
 
         <div className="chart">
           <h2>{analysisHeaderText}</h2>
-          <h4>Falls by HIR: {hirFalls}</h4>
+          {/* <h4>Falls by HIR: {hirFalls}</h4> */}
           <select
             id="fallsAnalysisType"
             value={analysisType}
@@ -342,6 +543,7 @@ export default function Dashboard() {
             <option value="hir">Falls by HIR</option>
             <option value="recurring">Residents w/ Recurring Falls</option>
           </select>
+
           <select
             id="analysisTimeRange"
             value={analysisTimeRange}
@@ -354,15 +556,43 @@ export default function Dashboard() {
             <option value="3months">Past 3 Months</option>
             <option value="6months">Past 6 Months</option>
           </select>
+
+          <select
+            id="unitSelection"
+            value={analysisUnit}
+            onchange={(e) => {
+              setAnalysisUnit(e.target.value);
+              updateAnalysisChart();
+            }}
+          >
+            <option value="allUnits">All Units</option>
+            <option value="Ground W">Ground W</option>
+            <option value="2 East E">2 East</option>
+            <option value="2 West W">2 West</option>
+            <option value="3 East E">3 East</option>
+            <option value="3 West W">3 West</option>
+          </select>
+
           {analysisChartData.datasets.length > 0 && <Bar data={analysisChartData} options={analysisChartOptions} />}
+          {/* {<Bar data={analysisChartData} options={analysisChartOptions} />} */}
         </div>
       </div>
 
       <div className="table-header">
         <h2>Falls Tracking Table: August 2024</h2>
-        <button className="download-button" onClick={downloadTable}>
-          Download as Excel
-        </button>
+        <div className="buttons">
+          {/* <div className="download-button">
+            <input type="file" accept=".csv" style={{ display: 'none' }} id="uploadCSV" onChange={uploadCSV} />
+            <label htmlFor="uploadCSV" className="upload-button">
+              Upload CSV
+            </label>
+          </div> */}
+          <div>
+            <button className="download-button" onClick={downloadTable}>
+              Download as Excel
+            </button>
+          </div>
+        </div>
       </div>
       <table id="fallsTable">
         <thead>
@@ -399,7 +629,7 @@ export default function Dashboard() {
               <td>{item.physicianRef}</td>
               <td>
                 <input type="checkbox" checked={item.incidentReportWritten} disabled />
-              </td>    
+              </td>
               <td>
                 <input type="checkbox" checked={item.postFallNotes} disabled />
               </td>
@@ -409,7 +639,7 @@ export default function Dashboard() {
         </tbody>
       </table>
       <div className="pagination">
-        {Array.from({ length: Math.ceil(dbData.length / itemsPerPage) }, (_, index) => (
+        {Array.from({ length: Math.ceil(setTableData.length / itemsPerPage) }, (_, index) => (
           <button key={index} onClick={() => handlePageChange(index + 1)}>
             {index + 1}
           </button>

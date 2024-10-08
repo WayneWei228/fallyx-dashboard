@@ -1,4 +1,4 @@
-export const threeMonthData = [
+export const threeData = [
     {
       date: '05-Jul-24',
       time: '04:55',
