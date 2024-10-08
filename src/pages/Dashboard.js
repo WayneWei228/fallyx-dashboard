@@ -117,19 +117,9 @@ export default function Dashboard() {
           },
         },
       },
-      // TODO: delete the legend
-      options: {
-        legend: {
-          display: false,
-        },
-        tooltips: {
-          callbacks: {
-            label: function (tooltipItem) {
-              console.log(tooltipItem);
-              return tooltipItem.yLabel;
-            },
-          },
-        },
+      plugins: {
+        tooltip: { enabled: false },
+        legend: { display: false },
       },
     });
 
@@ -448,28 +438,6 @@ export default function Dashboard() {
     updateAnalysisChart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fallsTimeRange, analysisType, analysisTimeRange, analysisUnit]);
-
-  // Function to parse CSV text into an array of objects
-  const parseCSV = (text) => {
-    const lines = text.split('\n').filter((line) => line.trim().length > 0); // Remove empty lines
-    const headers = lines[0].split('\t').map((header) => header.trim()); // Split by tab and trim headers
-    const data = lines.slice(1).map((line) => {
-      const values = line.split('\t').map((value) => value.trim()); // Split by tab and trim values
-      const item = {};
-      headers.forEach((header, index) => {
-        let value = values[index] || 'Unknown';
-
-        // Convert boolean fields represented by TRUE/FALSE in CSV
-        if (value.toLowerCase() === 'true') value = true;
-        if (value.toLowerCase() === 'false') value = false;
-
-        item[header] = value;
-      });
-      return item;
-    });
-
-    return data.filter((item) => Object.keys(item).length > 0);
-  };
 
   return (
     <div className="dashboard">
