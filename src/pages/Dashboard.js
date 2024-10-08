@@ -71,11 +71,13 @@ export default function Dashboard() {
     setGoal(25);
     setHIRFalls(7);
 
+    let currentFalls = countTotalFalls();
+
     // Initialize gauge chart data and options
     setGaugeChartData({
       datasets: [
         {
-          data: [0, 20], // TODO:
+          data: [currentFalls, goal - currentFalls],
           backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(200, 200, 200, 0.2)'],
           circumference: 180,
           rotation: 270,
@@ -133,7 +135,7 @@ export default function Dashboard() {
           // dynamicTyping: true,
           complete: function (results) {
             console.log('Parsed Data:', results.data); // 可选：查看解析结果
-            console.log(sampleData);
+            // console.log(sampleData);
             // setTableData(sampleData);
             setTableData(results.data);
           },
@@ -599,7 +601,6 @@ export default function Dashboard() {
               <td>{item.injury}</td>
               <td>{item.hospital}</td>
               <td>{item.ptRef}</td>
-              <td>N/A</td>
               <td>{item.physicianRef}</td>
               <td>{item.poaContacted}</td>
               <td>{item.incidentReport}</td>
