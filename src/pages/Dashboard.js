@@ -143,6 +143,8 @@ export default function Dashboard() {
           // dynamicTyping: true,
           complete: function (results) {
             console.log('Parsed Data:', results.data); // 可选：查看解析结果
+            console.log(sampleData);
+            // setTableData(sampleData);
             setTableData(results.data);
           },
         });
@@ -598,42 +600,42 @@ export default function Dashboard() {
         <thead>
           <tr>
             <th>Date</th>
+            <th>Name</th>
             <th>Time</th>
             <th>Location</th>
+            <th>Home Unit</th>
+
             <th>Nature of Fall/Cause</th>
+            <th>Interventions</th>
             <th>HIR</th>
             <th>Injury</th>
-            <th>Hospital</th>
+            <th>Transfer to Hospital</th>
             <th>PT Ref</th>
+            <th>Physician Referral (If Applicable)</th>
             <th>POA Contacted</th>
-            <th>Physician Ref</th>
-            <th>Incident Report Written</th>
-            <th>
-              3 Post Fall Notes<br></br> in 72 Hours
-            </th>
-            <th>Interventions</th>
+            <th>Risk Management Incident Fall Written</th>
+            <th>3 Post Fall Notes in 72hrs</th>
           </tr>
         </thead>
         <tbody id="fallsTableBody">
           {currentItems.map((item, i) => (
             <tr key={i}>
               <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
+              <td>{item.name}</td>
               <td>{item.time}</td>
               <td>{item.location}</td>
+              <td>{item.homeUnit}</td>
               <td>{item.cause}</td>
+              <td>{item.interventions}</td>
               <td>{item.hir}</td>
               <td>{item.injury}</td>
               <td>{item.hospital}</td>
               <td>{item.ptRef}</td>
-              <td>{item.poaContacted}</td>
+              <td>N/A</td>
               <td>{item.physicianRef}</td>
-              <td>
-                <input type="checkbox" checked={item.incidentReportWritten} disabled />
-              </td>
-              <td>
-                <input type="checkbox" checked={item.postFallNotes} disabled />
-              </td>
-              <td>{item.review}</td>
+              <td>{item.poaContacted}</td>
+              <td>{item.incidentReport}</td>
+              <td>{item.postFallNotes}</td>
             </tr>
           ))}
         </tbody>
