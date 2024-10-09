@@ -13,6 +13,8 @@ import * as Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 
 export default function Dashboard() {
+  console.log('Dashboard component rendered');
+
   const navigate = useNavigate();
   const months = [
     'January',
@@ -30,19 +32,47 @@ export default function Dashboard() {
   ];
 
   // State variables
-  const [threeMonthData, setThreeMonthData] = useState([]);
+  const [threeMonthData, setThreeMonthData] = useState(threeData);
   const [tableData, setTableData] = useState([]);
-  const [goal, setGoal] = useState(0);
+
+  const [goal, setGoal] = useState(25);
   const [gaugeChartData, setGaugeChartData] = useState({
-    labels: [],
-    datasets: [],
+    datasets: [
+      {
+        data: [0, 20],
+        backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(200, 200, 200, 0.2)'],
+        circumference: 180,
+        rotation: 270,
+      },
+    ],
   });
-  const [gaugeChartOptions, setGaugeChartOptions] = useState({});
+
+  const [gaugeChartOptions, setGaugeChartOptions] = useState({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '80%',
+    plugins: {
+      tooltip: { enabled: false },
+      legend: { display: false },
+    },
+  });
+
   const [lineChartData, setLineChartData] = useState({
     labels: [],
     datasets: [],
   });
-  const [lineChartOptions, setLineChartOptions] = useState({});
+  const [lineChartOptions, setLineChartOptions] = useState({
+    scales: {
+      y: {
+        beginAtZero: true,
+        min: 0,
+        max: 55,
+        ticks: {
+          stepSize: 5,
+        },
+      },
+    },
+  });
   const [analysisChartData, setAnalysisChartData] = useState({
     labels: ['Morning', 'Afternoon', 'Evening'],
     datasets: [
@@ -55,10 +85,27 @@ export default function Dashboard() {
       },
     ],
   });
-  const [analysisChartOptions, setAnalysisChartOptions] = useState({});
+
+  const [analysisChartOptions, setAnalysisChartOptions] = useState({
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+        },
+      },
+    },
+    plugins: {
+      tooltip: { enabled: false },
+      legend: { display: false },
+    },
+  });
+
   const [gaugeChart, setGaugeChart] = useState(true);
-  // const [hirFalls, setHIRFalls] = useState(5);
+
   const [fallsTimeRange, setFallsTimeRange] = useState('current');
+
   const [analysisType, setAnalysisType] = useState('timeOfDay');
   const [analysisTimeRange, setAnalysisTimeRange] = useState('current');
   const [analysisUnit, setAnalysisUnit] = useState('allUnits');
@@ -67,63 +114,37 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  
   useEffect(() => {
+    // setAnalysisChartData({
+    //   labels: ['Morning', 'Afternoon', 'Evening'],
+    //   datasets: [
+    //     {
+    //       label: 'Number of Falls',
+    //       data: [1, 1, 1], // TODO:
+    //       backgroundColor: 'rgba(76, 175, 80, 0.6)',
+    //       borderColor: 'rgb(76, 175, 80)',
+    //       borderWidth: 1,
+    //     },
+    //   ],
+    // });
+
+    // setAnalysisChartOptions({
+    //   responsive: true,
+    //   scales: {
+    //     y: {
+    //       beginAtZero: true,
+    //       ticks: {
+    //         stepSize: 1,
+    //       },
+    //     },
+    //   },
+    //   plugins: {
+    //     tooltip: { enabled: false },
+    //     legend: { display: false },
+    //   },
+    // });
+
     // Initialize data
-
-    // setTableData(
-    //   sampleData
-    //   // Add other data entries here...
-    // );
-
-    setThreeMonthData(threeData);
-
-    setGoal(25);
-    // setHIRFalls(7);
-
-    let currentFalls = countTotalFalls();
-
-    // Initialize gauge chart data and options
-    setGaugeChartData({
-      datasets: [
-        {
-          data: [currentFalls, goal - currentFalls],
-          backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(200, 200, 200, 0.2)'],
-          circumference: 180,
-          rotation: 270,
-        },
-      ],
-    });
-
-    setGaugeChartOptions({
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '80%',
-      plugins: {
-        tooltip: { enabled: false },
-        legend: { display: false },
-      },
-    });
-
-    // Initialize analysis chart data and options
-
-
-    setAnalysisChartOptions({
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            stepSize: 1,
-          },
-        },
-      },
-      plugins: {
-        tooltip: { enabled: false },
-        legend: { display: false },
-      },
-    });
-
     fetch(csvFile)
       .then((response) => response.text())
       .then((text) => {
@@ -155,19 +176,7 @@ export default function Dashboard() {
 
   const updateFallsChart = () => {
     const timeRange = fallsTimeRange;
-
-    setLineChartOptions({
-      scales: {
-        y: {
-          beginAtZero: true,
-          min: 0,
-          max: 55,
-          ticks: {
-            stepSize: 5,
-          },
-        },
-      },
-    });
+    const currentFalls = countTotalFalls();
 
     switch (timeRange) {
       case 'current':
@@ -175,7 +184,7 @@ export default function Dashboard() {
         setGaugeChartData({
           datasets: [
             {
-              data: [7, 13],
+              data: [currentFalls, goal - currentFalls],
               backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(200, 200, 200, 0.2)'],
               circumference: 180,
               rotation: 270,
@@ -231,7 +240,6 @@ export default function Dashboard() {
         break;
     }
   };
-
 
   const updateFalls = () => {
     let newGoal;
@@ -395,8 +403,7 @@ export default function Dashboard() {
         newData = Object.values(injuryCounts);
         break;
 
-      // TODO: Bug: graph no change
-      case 'HIR':
+      case 'hir':
         setAnalysisHeaderText('High Injury Risk (HIR) Falls');
         var hirCount = countFallsByHIR(filteredData);
         newLabels = [getMonthFromTimeRange(analysisTimeRange)];
@@ -424,9 +431,9 @@ export default function Dashboard() {
     });
   };
 
-  const logout = () => {
-    navigate('/login');
-  };
+  // const logout = () => {
+  //   navigate('/login');
+  // };
 
   const handleUpdateCSV = (index, newValue) => {
     // 更新特定行的 Physician Referral 值
@@ -434,7 +441,6 @@ export default function Dashboard() {
     updatedData[index].physicianRef = newValue;
     setTableData(updatedData);
   };
-
 
   const handleSaveCSV = () => {
     // 保存更新后的数据到 CSV
@@ -446,11 +452,11 @@ export default function Dashboard() {
   useEffect(() => {
     updateFallsChart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fallsTimeRange]);
+  }, [fallsTimeRange, tableData]);
 
   useEffect(() => {
     updateAnalysisChart();
-  }, [analysisType, analysisTimeRange, analysisUnit]);
+  }, [analysisType, analysisTimeRange, analysisUnit, tableData]);
 
   return (
     <div className="dashboard">
@@ -472,7 +478,7 @@ export default function Dashboard() {
               value={fallsTimeRange}
               onChange={(e) => {
                 setFallsTimeRange(e.target.value);
-                updateFallsChart();
+                // updateFallsChart();
               }}
             >
               <option value="current">This Month</option>
@@ -520,14 +526,14 @@ export default function Dashboard() {
             value={analysisType}
             onChange={(e) => {
               setAnalysisType(e.target.value);
-              updateAnalysisChart();
+              // updateAnalysisChart();
             }}
           >
             <option value="timeOfDay">Time of Day</option>
             <option value="location">Location</option>
             <option value="injuries">Injuries</option>
             <option value="hir">Falls by HIR</option>
-            <option value="recurring">Residents w/ Recurring Falls</option>
+            <option value="residents">Residents w/ Recurring Falls</option>
           </select>
 
           <select
@@ -535,12 +541,11 @@ export default function Dashboard() {
             value={analysisTimeRange}
             onChange={(e) => {
               setAnalysisTimeRange(e.target.value);
-              updateAnalysisChart();
+              // updateAnalysisChart();
             }}
           >
             <option value="current">Current Month</option>
             <option value="3months">Past 3 Months</option>
-            <option value="6months">Past 6 Months</option>
           </select>
 
           <select
@@ -548,7 +553,7 @@ export default function Dashboard() {
             value={analysisUnit}
             onchange={(e) => {
               setAnalysisUnit(e.target.value);
-              updateAnalysisChart();
+              // updateAnalysisChart();
             }}
           >
             <option value="allUnits">All Units</option>
