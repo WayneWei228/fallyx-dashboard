@@ -1,9 +1,9 @@
 date,name,time,Day of the Week,location,homeUnit,cause,interventions,hir,injury,hospital,ptRef,physicianRef,poaContacted,incidentReport,postFallNotes
-23-Sep-24,Betty,3:07,Thursday,Hallway,Z-Vin,Lost balance while reaching for an object,Encourage balance exercises.,yes,Mild Pain Reported (Various Locations),yes,yes,yes,yes,yes,N/A
-13-Sep-24,Robert,17:24,Tuesday,Bedroom,Z-Jun,Sudden dizziness,n/a ,no,Mild Pain Reported (Various Locations),no,yes,yes,yes,yes,yes
-08-Sep-24,Olajide,10:57,Wednesday,Bedroom,W-Gel,Slipped on wet floor,Ensure non-slip mat placed in bathroom ,no,Bruising,yes,yes,yes,no,no,no
+23-Sep-24,Betty,3:07,Thursday,Hallway,Z-Vin,Lost balance while reaching for an object,Encourage balance exercises.,yes,Mild Pain Reported (Various Locations),yes,yes,Yes,yes,yes,N/A
+13-Sep-24,Robert,17:24,Tuesday,Bedroom,Z-Jun,Sudden dizziness,"n/a ",no,Mild Pain Reported (Various Locations),no,yes,No,yes,yes,yes
+08-Sep-24,Olajide,10:57,Wednesday,Bedroom,W-Gel,Slipped on wet floor,"Ensure non-slip mat placed in bathroom ",no,Bruising,yes,yes,yes,no,no,no
 18-Sep-24,Mo,15:09,Wednesday,Hallway,Z-Jun,Missed step while walking,Encourage hand-eye coordination classes.,no,Mild Pain Reported (Various Locations),yes,yes,yes,no,no,no
 14-Sep-24,John,12:56,Wednesday,Hallway,W-Gel,Sudden dizziness,Place warning signs for wet areas.,no,Minimal Bleeding,yes,yes,yes,no,no,no
-27-Sep-24,Frank ,13:38,Wednesday,Bedroom,W-Gel,Missed step while walking,Encourage hand-eye coordination classes.,no,Minimal Bleeding,no,yes,yes,no,no,no
+27-Sep-24,"Frank ",13:38,Wednesday,Bedroom,W-Gel,Missed step while walking,Encourage hand-eye coordination classes.,no,Minimal Bleeding,no,yes,yes,no,no,no
 02-Sep-24,Margaret,21:41,Thursday,Hallway,Z-Vin,Tripped over walker,Ensure proper lighting in halls.,no,No Injury or Pain Denied,no,yes,yes,no,no,no
 04-Sep-24,Archer,4:02,Thursday,Sunroom,Z-Vin,Slipped on wet floor,Place non-slip mat placed in bathroom.,no,Contusion and Abrasion,no,yes,yes,no,no,no

@@ -10,6 +10,7 @@ import { threeData } from '../data/TableData';
 import { sampleData } from '../data/sampleData';
 import csvFile from '../data/demo.csv';
 import * as Papa from 'papaparse';
+import { saveAs } from 'file-saver';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export default function Dashboard() {
   });
   const [analysisChartOptions, setAnalysisChartOptions] = useState({});
   const [gaugeChart, setGaugeChart] = useState(true);
-  const [hirFalls, setHIRFalls] = useState(5);
+  // const [hirFalls, setHIRFalls] = useState(5);
   const [fallsTimeRange, setFallsTimeRange] = useState('current');
   const [analysisType, setAnalysisType] = useState('timeOfDay');
   const [analysisTimeRange, setAnalysisTimeRange] = useState('current');
@@ -66,6 +67,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  
   useEffect(() => {
     // Initialize data
 
@@ -77,7 +79,7 @@ export default function Dashboard() {
     setThreeMonthData(threeData);
 
     setGoal(25);
-    setHIRFalls(7);
+    // setHIRFalls(7);
 
     let currentFalls = countTotalFalls();
 
@@ -104,18 +106,7 @@ export default function Dashboard() {
     });
 
     // Initialize analysis chart data and options
-    setAnalysisChartData({
-      labels: ['Morning', 'Afternoon', 'Evening'],
-      datasets: [
-        {
-          label: 'Number of Falls',
-          data: [1, 1, 1], // TODO:
-          backgroundColor: 'rgba(76, 175, 80, 0.6)',
-          borderColor: 'rgb(76, 175, 80)',
-          borderWidth: 1,
-        },
-      ],
-    });
+
 
     setAnalysisChartOptions({
       responsive: true,
@@ -142,7 +133,6 @@ export default function Dashboard() {
           skipEmptyLines: true,
           // dynamicTyping: true,
           complete: function (results) {
-            console.log('Parsed Data:', results.data); // 可选：查看解析结果
             // console.log(sampleData);
             // setTableData(sampleData);
             setTableData(results.data);
@@ -242,11 +232,6 @@ export default function Dashboard() {
     }
   };
 
-  const downloadTable = () => {
-    const table = document.getElementById('fallsTable');
-    const wb = XLSX.utils.table_to_book(table, { sheet: 'Falls Tracking' });
-    XLSX.writeFile(wb, 'Falls_Tracking_August.xlsx');
-  };
 
   const updateFalls = () => {
     let newGoal;
@@ -443,11 +428,29 @@ export default function Dashboard() {
     navigate('/login');
   };
 
+  const handleUpdateCSV = (index, newValue) => {
+    // 更新特定行的 Physician Referral 值
+    const updatedData = [...tableData];
+    updatedData[index].physicianRef = newValue;
+    setTableData(updatedData);
+  };
+
+
+  const handleSaveCSV = () => {
+    // 保存更新后的数据到 CSV
+    const csv = Papa.unparse(tableData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'updated_fall_data.csv');
+  };
+
   useEffect(() => {
     updateFallsChart();
-    updateAnalysisChart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fallsTimeRange, analysisType, analysisTimeRange, analysisUnit]);
+  }, [fallsTimeRange]);
+
+  useEffect(() => {
+    updateAnalysisChart();
+  }, [analysisType, analysisTimeRange, analysisUnit]);
 
   return (
     <div className="dashboard">
@@ -564,20 +567,14 @@ export default function Dashboard() {
       <div className="table-header">
         <h2>Falls Tracking Table: August 2024</h2>
         <div className="buttons">
-          {/* <div className="download-button">
-            <input type="file" accept=".csv" style={{ display: 'none' }} id="uploadCSV" onChange={uploadCSV} />
-            <label htmlFor="uploadCSV" className="upload-button">
-              Upload CSV
-            </label>
-          </div> */}
           <div>
-            <button className="download-button" onClick={downloadTable}>
-              Download as Excel
+            <button className="download-button" onClick={handleSaveCSV}>
+              Download as CSV
             </button>
           </div>
         </div>
       </div>
-      <div className='table-wrapper'>
+      <div className="table-wrapper">
         <table>
           <thead>
             <tr>
@@ -586,7 +583,6 @@ export default function Dashboard() {
               <th>Time</th>
               <th>Location</th>
               <th>Home Unit</th>
-
               <th>Nature of Fall/Cause</th>
               <th>Interventions</th>
               <th>HIR</th>
@@ -613,7 +609,14 @@ export default function Dashboard() {
                 <td>{item.injury}</td>
                 <td>{item.hospital}</td>
                 <td>{item.ptRef}</td>
-                <td>{item.physicianRef}</td>
+                {/* <td>{item.physicianRef}</td> */}
+                <td>
+                  <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value)}>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="N/A">N/A</option>
+                  </select>
+                </td>
                 <td>{item.poaContacted}</td>
                 <td>{item.incidentReport}</td>
                 <td>{item.postFallNotes}</td>
