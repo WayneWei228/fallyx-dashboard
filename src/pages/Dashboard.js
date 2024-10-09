@@ -43,8 +43,16 @@ export default function Dashboard() {
   });
   const [lineChartOptions, setLineChartOptions] = useState({});
   const [analysisChartData, setAnalysisChartData] = useState({
-    labels: [],
-    datasets: [],
+    labels: ['Morning', 'Afternoon', 'Evening'],
+    datasets: [
+      {
+        label: 'Number of Falls',
+        data: [1, 1, 1], // TODO:
+        backgroundColor: 'rgba(76, 175, 80, 0.6)',
+        borderColor: 'rgb(76, 175, 80)',
+        borderWidth: 1,
+      },
+    ],
   });
   const [analysisChartOptions, setAnalysisChartOptions] = useState({});
   const [gaugeChart, setGaugeChart] = useState(true);
@@ -444,10 +452,13 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       {/* TODO */}
+      {/* <title> */}
       <h1>The Wellington LTC Falls Dashboard</h1>
-      <button className="logout-button" onClick={logout}>
+      {/* </title> */}
+
+      {/* <button className="logout-button" onClick={logout}>
         Log Out
-      </button>
+      </button> */}
 
       <div className="chart-container">
         <div className="chart">
@@ -566,49 +577,51 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <table id="fallsTable">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Name</th>
-            <th>Time</th>
-            <th>Location</th>
-            <th>Home Unit</th>
+      <div className='table-wrapper'>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Time</th>
+              <th>Location</th>
+              <th>Home Unit</th>
 
-            <th>Nature of Fall/Cause</th>
-            <th>Interventions</th>
-            <th>HIR</th>
-            <th>Injury</th>
-            <th>Transfer to Hospital</th>
-            <th>PT Ref</th>
-            <th>Physician Referral (If Applicable)</th>
-            <th>POA Contacted</th>
-            <th>Risk Management Incident Fall Written</th>
-            <th>3 Post Fall Notes in 72hrs</th>
-          </tr>
-        </thead>
-        <tbody id="fallsTableBody">
-          {currentItems.map((item, i) => (
-            <tr key={i}>
-              <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
-              <td>{item.name}</td>
-              <td>{item.time}</td>
-              <td>{item.location}</td>
-              <td>{item.homeUnit}</td>
-              <td>{item.cause}</td>
-              <td>{item.interventions}</td>
-              <td>{item.hir}</td>
-              <td>{item.injury}</td>
-              <td>{item.hospital}</td>
-              <td>{item.ptRef}</td>
-              <td>{item.physicianRef}</td>
-              <td>{item.poaContacted}</td>
-              <td>{item.incidentReport}</td>
-              <td>{item.postFallNotes}</td>
+              <th>Nature of Fall/Cause</th>
+              <th>Interventions</th>
+              <th>HIR</th>
+              <th>Injury</th>
+              <th>Transfer to Hospital</th>
+              <th>PT Ref</th>
+              <th>Physician Referral (If Applicable)</th>
+              <th>POA Contacted</th>
+              <th>Risk Management Incident Fall Written</th>
+              <th>3 Post Fall Notes in 72hrs</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody id="fallsTableBody">
+            {currentItems.map((item, i) => (
+              <tr key={i}>
+                <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
+                <td>{item.name}</td>
+                <td>{item.time}</td>
+                <td>{item.location}</td>
+                <td>{item.homeUnit}</td>
+                <td>{item.cause}</td>
+                <td>{item.interventions}</td>
+                <td>{item.hir}</td>
+                <td>{item.injury}</td>
+                <td>{item.hospital}</td>
+                <td>{item.ptRef}</td>
+                <td>{item.physicianRef}</td>
+                <td>{item.poaContacted}</td>
+                <td>{item.incidentReport}</td>
+                <td>{item.postFallNotes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className="pagination">
         {Array.from({ length: Math.ceil(setTableData.length / itemsPerPage) }, (_, index) => (
           <button key={index} onClick={() => handlePageChange(index + 1)}>

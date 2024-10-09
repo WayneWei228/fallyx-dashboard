@@ -1,10 +1,12 @@
 body {
   font-family: 'Proxima Nova', sans-serif;
-  margin: 0;
+  /* margin: 0; */
   padding: 20px;
   background-color: #f0f4f0;
   color: #333;
+  overflow: hidden;
 }
+
 .dashboard {
   max-width: 1200px;
   width: 100%;
@@ -14,6 +16,9 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding: 20px;
   position: relative;
+  height: 100dvh;
+  /* height: auto; */
+  overflow: auto;
 }
 
 h1,
@@ -65,6 +70,7 @@ h2 {
   font-size: 12px;
   color: #666;
 }
+
 .update-button,
 .download-button {
   background-color: #000;
@@ -101,6 +107,8 @@ table {
   border-collapse: collapse;
   margin-top: 20px;
   font-size: 12px;
+  max-height: 100px;
+  overflow: auto;
 }
 th,
 td {
@@ -134,4 +142,9 @@ tr:nth-child(even) {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.table-wrapper {
+  /* max-height: 500px;
+  overflow-y: auto; */
 }
