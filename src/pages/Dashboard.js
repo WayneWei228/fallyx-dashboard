@@ -551,7 +551,7 @@ export default function Dashboard() {
           <select
             id="unitSelection"
             value={analysisUnit}
-            onchange={(e) => {
+            onChange={(e) => {
               setAnalysisUnit(e.target.value);
               // updateAnalysisChart();
             }}
