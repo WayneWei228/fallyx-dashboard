@@ -7,14 +7,27 @@ import * as XLSX from 'xlsx/xlsx.mjs';
 import { useNavigate } from 'react-router-dom';
 import 'reactjs-popup/dist/index.css';
 import { threeData } from '../data/TableData';
-import { sampleData } from '../data/sampleData';
 import csvFile from '../data/demo.csv';
 import * as Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 
 export default function Dashboard() {
-  console.log('Dashboard component rendered');
-
+  function expandedLog(item, maxDepth = 100, depth = 0) {
+    if (depth > maxDepth) {
+      console.log(item);
+      return;
+    }
+    if (typeof item === 'object' && item !== null) {
+      Object.entries(item).forEach(([key, value]) => {
+        console.group(key + ' : ' + typeof value);
+        expandedLog(value, maxDepth, depth + 1);
+        console.groupEnd();
+      });
+    } else {
+      console.log(item);
+    }
+  }
+  // console.log('dashboard re-rendered');
   const navigate = useNavigate();
   const months = [
     'January',
@@ -32,22 +45,17 @@ export default function Dashboard() {
   ];
 
   // State variables
-  const [threeMonthData, setThreeMonthData] = useState(threeData);
+  const threeMonthData = threeData;
+  // const [threeMonthData, setThreeMonthData] = useState(threeData);
   const [tableData, setTableData] = useState([]);
 
   const [goal, setGoal] = useState(25);
   const [gaugeChartData, setGaugeChartData] = useState({
-    datasets: [
-      {
-        data: [0, 20],
-        backgroundColor: ['rgba(76, 175, 80, 0.8)', 'rgba(200, 200, 200, 0.2)'],
-        circumference: 180,
-        rotation: 270,
-      },
-    ],
+    labels: [],
+    datasets: [],
   });
 
-  const [gaugeChartOptions, setGaugeChartOptions] = useState({
+  const gaugeChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     cutout: '80%',
@@ -55,13 +63,24 @@ export default function Dashboard() {
       tooltip: { enabled: false },
       legend: { display: false },
     },
-  });
+  };
+
+  // const [gaugeChartOptions, setGaugeChartOptions] = useState({
+  //   responsive: true,
+  //   maintainAspectRatio: false,
+  //   cutout: '80%',
+  //   plugins: {
+  //     tooltip: { enabled: false },
+  //     legend: { display: false },
+  //   },
+  // });
 
   const [lineChartData, setLineChartData] = useState({
     labels: [],
     datasets: [],
   });
-  const [lineChartOptions, setLineChartOptions] = useState({
+
+  const lineChartOptions = {
     scales: {
       y: {
         beginAtZero: true,
@@ -72,21 +91,37 @@ export default function Dashboard() {
         },
       },
     },
-  });
+  };
+  // const [lineChartOptions, setLineChartOptions] = useState({
+  //   scales: {
+  //     y: {
+  //       beginAtZero: true,
+  //       min: 0,
+  //       max: 55,
+  //       ticks: {
+  //         stepSize: 5,
+  //       },
+  //     },
+  //   },
+  // });
   const [analysisChartData, setAnalysisChartData] = useState({
-    labels: ['Morning', 'Afternoon', 'Evening'],
-    datasets: [
-      {
-        label: 'Number of Falls',
-        data: [1, 1, 1], // TODO:
-        backgroundColor: 'rgba(76, 175, 80, 0.6)',
-        borderColor: 'rgb(76, 175, 80)',
-        borderWidth: 1,
-      },
-    ],
+    // labels: ['Morning', 'Afternoon', 'Evening'],
+    // datasets: [
+    //   {
+    //     label: 'Number of Falls',
+    //     data: [1, 1, 1], // TODO:
+    //     backgroundColor: 'rgba(76, 175, 80, 0.6)',
+    //     borderColor: 'rgb(76, 175, 80)',
+    //     borderWidth: 1,
+    //   },
+    // ],
+    labels: [],
+    datasets: [],
   });
 
-  const [analysisChartOptions, setAnalysisChartOptions] = useState({
+  // expandedLog(analysisChartData);
+
+  const analysisChartOptions = {
     responsive: true,
     scales: {
       y: {
@@ -100,7 +135,23 @@ export default function Dashboard() {
       tooltip: { enabled: false },
       legend: { display: false },
     },
-  });
+  };
+
+  // const [analysisChartOptions, setAnalysisChartOptions] = useState({
+  //   responsive: true,
+  //   scales: {
+  //     y: {
+  //       beginAtZero: true,
+  //       ticks: {
+  //         stepSize: 1,
+  //       },
+  //     },
+  //   },
+  //   plugins: {
+  //     tooltip: { enabled: false },
+  //     legend: { display: false },
+  //   },
+  // });
 
   const [gaugeChart, setGaugeChart] = useState(true);
 
@@ -113,6 +164,11 @@ export default function Dashboard() {
   const [analysisHeaderText, setAnalysisHeaderText] = useState('Falls by Time of Day');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  // console.log('tableData');
+  // console.log(tableData);
+  // console.log('gaugeChartData');
+  // expandedLog(gaugeChartData);
 
   useEffect(() => {
     // setAnalysisChartData({
@@ -148,7 +204,6 @@ export default function Dashboard() {
     fetch(csvFile)
       .then((response) => response.text())
       .then((text) => {
-        // 使用 PapaParse 解析 CSV 数据
         Papa.parse(text, {
           header: true,
           skipEmptyLines: true,
@@ -160,19 +215,31 @@ export default function Dashboard() {
           },
         });
       });
+
+    // console.log('fetching data effect');
+    // expandedLog(analysisChartData);
   }, []);
 
-  function countTotalFalls() {
-    return tableData.length;
-  }
+  useEffect(() => {
+    updateFallsChart();
+    // console.log('update fall chart effects');
+    // expandedLog(analysisChartData);
+  }, [fallsTimeRange, tableData]);
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-  };
+  useEffect(() => {
+    updateAnalysisChart();
+    // console.log('update Analysis effect');
+    // expandedLog(analysisChartData);
+  }, [analysisType, analysisTimeRange, analysisUnit, tableData]);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = tableData.slice(indexOfFirstItem, indexOfLastItem);
+  // useEffect(() => {
+  //   console.log('tableData updated:', tableData);
+  // }, [tableData]);
+
+  // useEffect(() => {
+  //   console.log('gaugeChartData updated:');
+  //   expandedLog(gaugeChartData);
+  // }, [gaugeChartData]);
 
   const updateFallsChart = () => {
     const timeRange = fallsTimeRange;
@@ -256,8 +323,20 @@ export default function Dashboard() {
         console.log(err);
       });
 
-    setGoal(newGoal);
+    // setGoal(newGoal);
   };
+
+  function countTotalFalls() {
+    return tableData.length;
+  }
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = tableData.slice(indexOfFirstItem, indexOfLastItem);
 
   function countFallsByTimeOfDay(data) {
     var timeOfDayCounts = { Morning: 0, Evening: 0, Night: 0 };
@@ -449,14 +528,7 @@ export default function Dashboard() {
     saveAs(blob, 'updated_fall_data.csv');
   };
 
-  useEffect(() => {
-    updateFallsChart();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fallsTimeRange, tableData]);
-
-  useEffect(() => {
-    updateAnalysisChart();
-  }, [analysisType, analysisTimeRange, analysisUnit, tableData]);
+  // console.log("I'm from end");
 
   return (
     <div className="dashboard">
@@ -489,7 +561,9 @@ export default function Dashboard() {
               <div id="gaugeContainer">
                 <div className="gauge">
                   {gaugeChartData.datasets.length > 0 && <Doughnut data={gaugeChartData} options={gaugeChartOptions} />}
-                  <div className="gauge-value">3</div>
+                  <div className="gauge-value">{tableData.length}</div>
+                  <br />
+                  {/* <br /> */}
                   <div className="gauge-label">falls this month</div>
                   <div className="gauge-goal">
                     Goal: <span id="fallGoal">{goal}</span>
@@ -504,15 +578,6 @@ export default function Dashboard() {
             ) : (
               <div id="lineChartContainer">
                 {lineChartData.datasets.length > 0 && <Line data={lineChartData} options={lineChartOptions} />}
-              </div>
-            )}
-            <br />
-            <br />
-            {gaugeChart && (
-              <div>
-                <button className="update-button" id="update-button" onClick={updateFalls}>
-                  Update Falls Goal
-                </button>
               </div>
             )}
           </div>
@@ -579,57 +644,56 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Name</th>
-              <th>Time</th>
-              <th>Location</th>
-              <th>Home Unit</th>
-              <th>Nature of Fall/Cause</th>
-              <th>Interventions</th>
-              <th>HIR</th>
-              <th>Injury</th>
-              <th>Transfer to Hospital</th>
-              <th>PT Ref</th>
-              <th>Physician Referral (If Applicable)</th>
-              <th>POA Contacted</th>
-              <th>Risk Management Incident Fall Written</th>
-              <th>3 Post Fall Notes in 72hrs</th>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Time</th>
+            <th>Location</th>
+            <th>Home Unit</th>
+            <th>Nature of Fall/Cause</th>
+            <th>Interventions</th>
+            <th>HIR</th>
+            <th>Injury</th>
+            <th>Transfer to Hospital</th>
+            <th>PT Ref</th>
+            <th>Physician Referral (If Applicable)</th>
+            <th>POA Contacted</th>
+            <th>Risk Management Incident Fall Written</th>
+            <th>3 Post Fall Notes in 72hrs</th>
+          </tr>
+        </thead>
+        <tbody id="fallsTableBody">
+          {currentItems.map((item, i) => (
+            <tr key={i}>
+              <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
+              <td>{item.name}</td>
+              <td>{item.time}</td>
+              <td>{item.location}</td>
+              <td>{item.homeUnit}</td>
+              <td>{item.cause}</td>
+              <td>{item.interventions}</td>
+              <td>{item.hir}</td>
+              <td>{item.injury}</td>
+              <td>{item.hospital}</td>
+              <td>{item.ptRef}</td>
+              {/* <td>{item.physicianRef}</td> */}
+              <td>
+                <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value)}>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="N/A">N/A</option>
+                </select>
+              </td>
+              <td>{item.poaContacted}</td>
+              <td>{item.incidentReport}</td>
+              <td>{item.postFallNotes}</td>
             </tr>
-          </thead>
-          <tbody id="fallsTableBody">
-            {currentItems.map((item, i) => (
-              <tr key={i}>
-                <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
-                <td>{item.name}</td>
-                <td>{item.time}</td>
-                <td>{item.location}</td>
-                <td>{item.homeUnit}</td>
-                <td>{item.cause}</td>
-                <td>{item.interventions}</td>
-                <td>{item.hir}</td>
-                <td>{item.injury}</td>
-                <td>{item.hospital}</td>
-                <td>{item.ptRef}</td>
-                {/* <td>{item.physicianRef}</td> */}
-                <td>
-                  <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value)}>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="N/A">N/A</option>
-                  </select>
-                </td>
-                <td>{item.poaContacted}</td>
-                <td>{item.incidentReport}</td>
-                <td>{item.postFallNotes}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
+
       <div className="pagination">
         {Array.from({ length: Math.ceil(setTableData.length / itemsPerPage) }, (_, index) => (
           <button key={index} onClick={() => handlePageChange(index + 1)}>

@@ -60,9 +60,9 @@ h2 {
   position: absolute;
   top: 50%;
   left: 50%;
-  padding-top: 65px;
+  padding-top: 70px; /* Adjusted padding to center */
   transform: translate(-50%, -50%);
-  font-size: 86px;
+  font-size: 100px; /* Increased font size */
   font-weight: bold;
 }
 .gauge-scale {
@@ -149,7 +149,10 @@ tr:nth-child(even) {
   align-items: center;
 }
 
-.table-wrapper {
-  /* max-height: 500px;
-  overflow-y: auto; */
+.gauge-label {
+  font-size: 34px; /* Adjust this size if you want it bigger */
+  font-weight: bold; /* Make the text bold */
+  text-align: center;
+  margin-top: -20px; /* Adjust the spacing as needed */
+  color: #333; /* Ensure the color matches */
 }
