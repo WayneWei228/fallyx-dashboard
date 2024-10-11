@@ -1,17 +1,50 @@
-import React, { useEffect, useState } from 'react';
-import { Chart } from 'chart.js/auto';
-import '../styles/Management_Dashboard.css';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { Bar } from 'react-chartjs-2';
+// import '../styles/ManagementDashboard.css';
+import styles from '../styles/ManagementDashboard.module.css';
 import { useNavigate } from 'react-router-dom';
 import SummaryCard from './SummaryCard';
 import Modal from './Modal';
+import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+
+Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Management_Dashboard() {
+  console.log('dashboard re-rendered');
+  function expandedLog(item, maxDepth = 100, depth = 0) {
+    if (depth > maxDepth) {
+      console.log(item);
+      return;
+    }
+    if (typeof item === 'object' && item !== null) {
+      Object.entries(item).forEach(([key, value]) => {
+        console.group(key + ' : ' + typeof value);
+        expandedLog(value, maxDepth, depth + 1);
+        console.groupEnd();
+      });
+    } else {
+      console.log(item);
+    }
+  }
+
   const navigate = useNavigate();
-  const [fallsChart, setFallsChart] = useState();
-  const [homesChart, setHomesChart] = useState();
+
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState([]);
   const [modalTitle, setModalTitle] = useState('');
+  const [fallsTimeRange, setFallsTimeRange] = useState('current');
+  const [homesTimeRange, setHomesTimeRange] = useState('current');
+  const [fallsChartData, setFallsChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
+
+  const [homesChartData, setHomesChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
+
+  // expandedLog(fallsChartData);
 
   const data_for_current_falls = [
     { name: 'Niagra LTC', value: 2, headInjury: 3, fracture: 2, skinTear: 4 },
@@ -51,121 +84,31 @@ export default function Management_Dashboard() {
     setShowModal(false);
   };
 
-  useEffect(() => {
-    let chart_falls_Status = Chart.getChart('FallsChart');
-    if (chart_falls_Status !== undefined) {
-      chart_falls_Status.destroy();
-    }
-
-    let default_falls_data = [...data_for_current_falls];
-
-    default_falls_data.sort((a, b) => b.value - a.value);
-
-    setFallsChart(
-      new Chart(document.getElementById('FallsChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: default_falls_data.map((item) => item.name),
-          datasets: [
-            {
-              label: 'Number of Falls',
-              data: default_falls_data.map((item) => item.value),
-              backgroundColor: 'rgba(76, 175, 80, 0.6)',
-              borderColor: 'rgb(76, 175, 80)',
-              borderWidth: 1,
-            },
-          ],
+  const barCharOptions = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1,
-              },
-            },
-          },
-          onClick: (event, elements) => {
-            if (elements.length > 0) {
-              const index = elements[0].index;
-              const locationName = default_falls_data[index].name;
-              const { headInjury, fracture, skinTear } = default_falls_data.find((fall) => fall.name === locationName);
-              const content = [`Head injury: ${headInjury}`, `Fracture: ${fracture}`, `Skin Tear: ${skinTear}`];
-              openModal(locationName, content);
-            }
-          },
-        },
-      })
-    );
+      },
+    },
+    plugins: {
+      tooltip: { enabled: false },
+      legend: { display: false },
+    },
+    animations: {
+      duration: 0,
+      // duration: 1000,
+      // easing: 'linear',
+    },
+  };
 
-    let chart_homes_Status = Chart.getChart('HomesChart');
-    if (chart_homes_Status !== undefined) {
-      chart_homes_Status.destroy();
-    }
-
-    let default_homes_data = [...data_for_current_homes];
-
-    default_homes_data.sort((a, b) => b.value - a.value);
-
-    setHomesChart(
-      new Chart(document.getElementById('HomesChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: default_homes_data.map((item) => item.name),
-          datasets: [
-            {
-              label: 'Number of Falls',
-              data: default_homes_data.map((item) => item.value),
-              backgroundColor: 'rgba(76, 175, 80, 0.6)',
-              borderColor: 'rgb(76, 175, 80)',
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1,
-              },
-            },
-          },
-          onClick: (event, elements) => {
-            if (elements.length > 0) {
-              const index = elements[0].index;
-              const locationName = default_homes_data[index].name;
-              const { unwrittenNotes, missingNotes } = default_homes_data.find((home) => home.name === locationName);
-              const content = [
-                `Unwritten fall notes by month's end: ${unwrittenNotes}`,
-                `Number of missing post-fall notes: ${missingNotes}`,
-              ];
-              openModal(locationName, content);
-            }
-          },
-        },
-      })
-    );
-  }, []);
-
-  const updateFallsChart = async () => {
-    // const header = document.getElementById('fallsHeader');
-    const timeRange = document.getElementById('fallsTimeRange').value;
+  const updateFallsChart = () => {
     let newData = [];
 
-    switch (timeRange) {
+    switch (fallsTimeRange) {
       case 'current':
         newData = [...data_for_current_falls];
         break;
@@ -176,58 +119,24 @@ export default function Management_Dashboard() {
 
     newData.sort((a, b) => b.value - a.value);
 
-    fallsChart.destroy();
-
-    setFallsChart(
-      new Chart(document.getElementById('FallsChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: newData.map((item) => item.name),
-          datasets: [
-            {
-              label: 'Number of Falls',
-              data: newData.map((item) => item.value),
-              backgroundColor: 'rgba(76, 175, 80, 0.6)',
-              borderColor: 'rgb(76, 175, 80)',
-              borderWidth: 1,
-            },
-          ],
+    setFallsChartData({
+      labels: newData.map((item) => item.name),
+      datasets: [
+        {
+          data: newData.map((item) => item.value),
+          backgroundColor: 'rgba(76, 175, 80, 0.6)',
+          borderColor: 'rgb(76, 175, 80)',
+          borderWidth: 1,
+          indexAxis: 'x',
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1,
-              },
-            },
-          },
-          onClick: (event, elements) => {
-            if (elements.length > 0) {
-              const index = elements[0].index;
-              const locationName = newData[index].name;
-              const { headInjury, fracture, skinTear } = newData.find((fall) => fall.name === locationName);
-              const content = [`Head injury: ${headInjury}`, `Fracture: ${fracture}`, `Skin Tear: ${skinTear}`];
-              openModal(locationName, content);
-            }
-          },
-        },
-      })
-    );
+      ],
+    });
   };
 
-  const updateHomesChart = async () => {
-    // const header = document.getElementById('homesHeader');
-    const timeRange = document.getElementById('homesTimeRange').value;
+  const updateHomesChart = () => {
     let newData = [];
 
-    switch (timeRange) {
+    switch (homesTimeRange) {
       case 'current':
         newData = [...data_for_current_homes];
         break;
@@ -237,102 +146,101 @@ export default function Management_Dashboard() {
     }
 
     newData.sort((a, b) => b.value - a.value);
-
-    homesChart.destroy();
-
-    setHomesChart(
-      new Chart(document.getElementById('HomesChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: newData.map((item) => item.name),
-          datasets: [
-            {
-              label: 'Number of Falls',
-              data: newData.map((item) => item.value),
-              backgroundColor: 'rgba(76, 175, 80, 0.6)',
-              borderColor: 'rgb(76, 175, 80)',
-              borderWidth: 1,
-            },
-          ],
+    setHomesChartData({
+      labels: newData.map((item) => item.name),
+      datasets: [
+        {
+          // label: 'Number of Falls',
+          data: newData.map((item) => item.value),
+          backgroundColor: 'rgba(76, 175, 80, 0.6)',
+          borderColor: 'rgb(76, 175, 80)',
+          borderWidth: 1,
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1,
-              },
-            },
-          },
-          onClick: (event, elements) => {
-            if (elements.length > 0) {
-              const index = elements[0].index;
-              const locationName = newData[index].name;
-              const { unwrittenNotes, missingNotes } = newData.find((home) => home.name === locationName);
-              const content = [
-                `Unwritten fall notes by month's end: ${unwrittenNotes}`,
-                `Number of missing post-fall notes: ${missingNotes}`,
-              ];
-              openModal(locationName, content);
-            }
-          },
-        },
-      })
-    );
+      ],
+    });
   };
+
+  // useEffect(() => {
+  //   updateFallsChart();
+  // }, [fallsTimeRange]);
+
+  useEffect(() => {
+    updateFallsChart();
+  }, [fallsTimeRange]);
+
+  useEffect(() => {
+    updateHomesChart();
+  }, [homesTimeRange]);
+
+  useEffect(() => {
+    console.log('fallsChartData');
+    expandedLog(fallsChartData);
+  }, [fallsChartData]);
+
+  useEffect(() => {
+    console.log('homesChartData');
+    expandedLog(homesChartData);
+  }, [homesChartData]);
 
   const logout = () => {
     navigate('/login');
   };
 
   const summaryData = [
-    { value: 20, title: 'Falls', subtitle: 'Niagra LTC', linkTo: '/niagara-ltc' },
-    { value: 18, title: 'Falls', subtitle: 'Mill creek LTC', linkTo: '/mill-creek-care' },
-    { value: 10, title: 'Falls', subtitle: 'The Wellington LTC', linkTo: '/the-wellington-ltc' },
-    { value: 15, title: 'Falls', subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
+    { value: 20, subtitle: 'Niagra LTC', linkTo: '/niagara-ltc' },
+    { value: 18, subtitle: 'Mill creek LTC', linkTo: '/mill-creek-care' },
+    { value: 10, subtitle: 'The Wellington LTC', linkTo: '/the-wellington-ltc' },
+    { value: 15, subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
   ];
 
   return (
-    <div className="dashboard">
-      <h1>Responsive Management Falls</h1>
-      <button className="logout-button" onClick={logout}>
+    <div className={styles.dashboard}>
+      <h1 className={styles.h1}>Responsive Management Falls</h1>
+      <button className={styles['logout-button']} onClick={logout}>
         Log Out
       </button>
 
-      <div className="chart-container">
-        <div className="chart">
-          <h2 id="fallsHeader">falls with significant injury</h2>
-          <select id="fallsTimeRange" onChange={updateFallsChart}>
+      <div className={styles['chart-container']}>
+        <div className={styles['chart']}>
+          <h2 id="fallsHeader">Falls with significant injury</h2>
+          <select
+            id="fallsTimeRange"
+            value={fallsTimeRange}
+            className={styles.select}
+            onChange={(e) => {
+              setFallsTimeRange(e.target.value);
+            }}
+          >
             <option value="current">Current Month</option>
             <option value="3months">Past 3 Months</option>
           </select>
-          <canvas id="FallsChart"></canvas>
+          {fallsChartData.datasets.length > 0 && <Bar data={fallsChartData} options={barCharOptions} />}
         </div>
 
-        <div className="chart">
+        <div className={styles['chart']}>
           <h2 id="homesHeader">Number of incidents of non-compliance</h2>
-          <select id="homesTimeRange" onChange={updateHomesChart}>
+          <select
+            id="homesTimeRange"
+            value={homesTimeRange}
+            onChange={(e) => {
+              setHomesTimeRange(e.target.value);
+            }}
+          >
             <option value="current">Current Month</option>
             <option value="3months">Past 3 Months</option>
           </select>
-          <canvas id="HomesChart"></canvas>
+
+          {homesChartData.datasets.length > 0 && <Bar data={homesChartData} options={barCharOptions} />}
         </div>
       </div>
 
-      <div className="summary-container">
+      <div className={styles['summary-container']}>
         <h2>Fall Summary</h2>
-        <div className="summary-cards">
+        <div className={styles['summary-cards']}>
           {summaryData.map((item, index) => (
             <SummaryCard
               key={index}
               value={item.value}
-              title={item.title}
               subtitle={item.subtitle}
               linkTo={item.linkTo} // 传递linkTo参数
             />
@@ -344,3 +252,33 @@ export default function Management_Dashboard() {
     </div>
   );
 }
+
+// onClick={(event, elements) => {
+//   if (elements.length > 0) {
+//     const index = elements[0].index;
+//     const locationName = fallsChartData.datasets.data[index].name;
+//     const { unwrittenNotes, missingNotes } = fallsChartData.datasets.data.find(
+//       (home) => home.name === locationName
+//     );
+//     const content = [
+//       `Unwritten fall notes by month's end: ${unwrittenNotes}`,
+//       `Number of missing post-fall notes: ${missingNotes}`,
+//     ];
+//     openModal(locationName, content);
+//   }
+// }}
+
+// onClick={(event, elements) => {
+//   if (elements.length > 0) {
+//     const index = elements[0].index;
+//     const locationName = homesChartData.datasets.data[index].name;
+//     const { unwrittenNotes, missingNotes } = homesChartData.datasets.data.find(
+//       (home) => home.name === locationName
+//     );
+//     const content = [
+//       `Unwritten fall notes by month's end: ${unwrittenNotes}`,
+//       `Number of missing post-fall notes: ${missingNotes}`,
+//     ];
+//     openModal(locationName, content);
+//   }
+// }}

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
-import '../styles/Dashboard.css';
-import { ref, update } from 'firebase/database';
-import { db } from '../firebase';
-import * as XLSX from 'xlsx/xlsx.mjs';
+// import "../styles/Dashboard.css"
+import styles from '../styles/Dashboard.module.css';
 import { useNavigate } from 'react-router-dom';
-import 'reactjs-popup/dist/index.css';
 import { threeData } from '../data/TableData';
 import csvFile from '../data/demo.csv';
 import * as Papa from 'papaparse';
 import { saveAs } from 'file-saver';
+import { Chart, ArcElement, PointElement, LineElement} from 'chart.js';
+
+Chart.register(ArcElement, PointElement, LineElement);
 
 export default function Dashboard(props) {
   let title = props.title;
@@ -48,7 +48,6 @@ export default function Dashboard(props) {
 
   // State variables
   const threeMonthData = threeData;
-  // const [threeMonthData, setThreeMonthData] = useState(threeData);
   const [tableData, setTableData] = useState([]);
 
   const [goal, setGoal] = useState(25);
@@ -67,16 +66,6 @@ export default function Dashboard(props) {
     },
   };
 
-  // const [gaugeChartOptions, setGaugeChartOptions] = useState({
-  //   responsive: true,
-  //   maintainAspectRatio: false,
-  //   cutout: '80%',
-  //   plugins: {
-  //     tooltip: { enabled: false },
-  //     legend: { display: false },
-  //   },
-  // });
-
   const [lineChartData, setLineChartData] = useState({
     labels: [],
     datasets: [],
@@ -94,29 +83,7 @@ export default function Dashboard(props) {
       },
     },
   };
-  // const [lineChartOptions, setLineChartOptions] = useState({
-  //   scales: {
-  //     y: {
-  //       beginAtZero: true,
-  //       min: 0,
-  //       max: 55,
-  //       ticks: {
-  //         stepSize: 5,
-  //       },
-  //     },
-  //   },
-  // });
   const [analysisChartData, setAnalysisChartData] = useState({
-    // labels: ['Morning', 'Afternoon', 'Evening'],
-    // datasets: [
-    //   {
-    //     label: 'Number of Falls',
-    //     data: [1, 1, 1], // TODO:
-    //     backgroundColor: 'rgba(76, 175, 80, 0.6)',
-    //     borderColor: 'rgb(76, 175, 80)',
-    //     borderWidth: 1,
-    //   },
-    // ],
     labels: [],
     datasets: [],
   });
@@ -139,22 +106,6 @@ export default function Dashboard(props) {
     },
   };
 
-  // const [analysisChartOptions, setAnalysisChartOptions] = useState({
-  //   responsive: true,
-  //   scales: {
-  //     y: {
-  //       beginAtZero: true,
-  //       ticks: {
-  //         stepSize: 1,
-  //       },
-  //     },
-  //   },
-  //   plugins: {
-  //     tooltip: { enabled: false },
-  //     legend: { display: false },
-  //   },
-  // });
-
   const [gaugeChart, setGaugeChart] = useState(true);
 
   const [fallsTimeRange, setFallsTimeRange] = useState('current');
@@ -167,41 +118,15 @@ export default function Dashboard(props) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  // for debug
   // console.log('tableData');
   // console.log(tableData);
   // console.log('gaugeChartData');
   // expandedLog(gaugeChartData);
 
+  // maybe only setState can achieve
+
   useEffect(() => {
-    // setAnalysisChartData({
-    //   labels: ['Morning', 'Afternoon', 'Evening'],
-    //   datasets: [
-    //     {
-    //       label: 'Number of Falls',
-    //       data: [1, 1, 1], // TODO:
-    //       backgroundColor: 'rgba(76, 175, 80, 0.6)',
-    //       borderColor: 'rgb(76, 175, 80)',
-    //       borderWidth: 1,
-    //     },
-    //   ],
-    // });
-
-    // setAnalysisChartOptions({
-    //   responsive: true,
-    //   scales: {
-    //     y: {
-    //       beginAtZero: true,
-    //       ticks: {
-    //         stepSize: 1,
-    //       },
-    //     },
-    //   },
-    //   plugins: {
-    //     tooltip: { enabled: false },
-    //     legend: { display: false },
-    //   },
-    // });
-
     // Initialize data
     fetch(csvFile)
       .then((response) => response.text())
@@ -209,31 +134,22 @@ export default function Dashboard(props) {
         Papa.parse(text, {
           header: true,
           skipEmptyLines: true,
-          // dynamicTyping: true,
           complete: function (results) {
-            // console.log(sampleData);
-            // setTableData(sampleData);
             setTableData(results.data);
           },
         });
       });
-
-    // console.log('fetching data effect');
-    // expandedLog(analysisChartData);
   }, []);
 
   useEffect(() => {
     updateFallsChart();
-    // console.log('update fall chart effects');
-    // expandedLog(analysisChartData);
   }, [fallsTimeRange, tableData]);
 
   useEffect(() => {
     updateAnalysisChart();
-    // console.log('update Analysis effect');
-    // expandedLog(analysisChartData);
   }, [analysisType, analysisTimeRange, analysisUnit, tableData]);
 
+  // For debug
   // useEffect(() => {
   //   console.log('tableData updated:', tableData);
   // }, [tableData]);
@@ -308,24 +224,6 @@ export default function Dashboard(props) {
       default:
         break;
     }
-  };
-
-  const updateFalls = () => {
-    let newGoal;
-
-    do {
-      newGoal = parseInt(prompt('Please enter the new Falls Goal'), 10);
-    } while (isNaN(newGoal));
-
-    const goalRef = ref(db);
-    const updates = { 'falls_goal/': newGoal };
-    update(goalRef, updates)
-      .then(() => {})
-      .catch((err) => {
-        console.log(err);
-      });
-
-    // setGoal(newGoal);
   };
 
   function countTotalFalls() {
@@ -517,42 +415,34 @@ export default function Dashboard(props) {
   // };
 
   const handleUpdateCSV = (index, newValue) => {
-    // 更新特定行的 Physician Referral 值
     const updatedData = [...tableData];
     updatedData[index].physicianRef = newValue;
     setTableData(updatedData);
   };
 
   const handleSaveCSV = () => {
-    // 保存更新后的数据到 CSV
     const csv = Papa.unparse(tableData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, 'updated_fall_data.csv');
   };
 
-  // console.log("I'm from end");
-
   return (
-    <div className="dashboard">
-      {/* TODO */}
-      {/* <title> */}
+    <div className={styles.dashboard}>
       <h1>{title}</h1>
-      {/* </title> */}
 
       {/* <button className="logout-button" onClick={logout}>
         Log Out
       </button> */}
 
-      <div className="chart-container">
-        <div className="chart">
-          <div className="gauge-container">
+      <div className={styles['chart-container']}>
+        <div className={styles.chart}>
+          <div className={styles['gauge-container']}>
             <h2 style={{ paddingTop: '7.5px' }}>Falls Overview</h2>
             <select
               id="fallsTimeRange"
               value={fallsTimeRange}
               onChange={(e) => {
                 setFallsTimeRange(e.target.value);
-                // updateFallsChart();
               }}
             >
               <option value="current">This Month</option>
@@ -561,17 +451,16 @@ export default function Dashboard(props) {
             </select>
             {gaugeChart ? (
               <div id="gaugeContainer">
-                <div className="gauge">
+                <div className={styles.gauge}>
                   {gaugeChartData.datasets.length > 0 && <Doughnut data={gaugeChartData} options={gaugeChartOptions} />}
-                  <div className="gauge-value">{tableData.length}</div>
+                  <div className={styles['gauge-value']}>{tableData.length}</div>
                   <br />
-                  {/* <br /> */}
-                  <div className="gauge-label">falls this month</div>
-                  <div className="gauge-goal">
+                  <div className={styles['gauge-label']}>falls this month</div>
+                  <div className={styles['gauge-goal']}>
                     Goal: <span id="fallGoal">{goal}</span>
                   </div>
                   <br />
-                  <div className="gauge-scale">
+                  <div className={styles['gauge-scale']}>
                     <span>0</span>
                     <span>25</span>
                   </div>
@@ -585,15 +474,13 @@ export default function Dashboard(props) {
           </div>
         </div>
 
-        <div className="chart">
+        <div className={styles.chart}>
           <h2>{analysisHeaderText}</h2>
-          {/* <h4>Falls by HIR: {hirFalls}</h4> */}
           <select
             id="fallsAnalysisType"
             value={analysisType}
             onChange={(e) => {
               setAnalysisType(e.target.value);
-              // updateAnalysisChart();
             }}
           >
             <option value="timeOfDay">Time of Day</option>
@@ -608,7 +495,6 @@ export default function Dashboard(props) {
             value={analysisTimeRange}
             onChange={(e) => {
               setAnalysisTimeRange(e.target.value);
-              // updateAnalysisChart();
             }}
           >
             <option value="current">Current Month</option>
@@ -620,7 +506,6 @@ export default function Dashboard(props) {
             value={analysisUnit}
             onChange={(e) => {
               setAnalysisUnit(e.target.value);
-              // updateAnalysisChart();
             }}
           >
             <option value="allUnits">All Units</option>
@@ -632,15 +517,14 @@ export default function Dashboard(props) {
           </select>
 
           {analysisChartData.datasets.length > 0 && <Bar data={analysisChartData} options={analysisChartOptions} />}
-          {/* {<Bar data={analysisChartData} options={analysisChartOptions} />} */}
         </div>
       </div>
 
-      <div className="table-header">
+      <div className={styles['table-header']}>
         <h2>Falls Tracking Table: August 2024</h2>
-        <div className="buttons">
+        <div className={styles.buttons}>
           <div>
-            <button className="download-button" onClick={handleSaveCSV}>
+            <button className={styles['download-button']} onClick={handleSaveCSV}>
               Download as CSV
             </button>
           </div>
@@ -680,7 +564,6 @@ export default function Dashboard(props) {
               <td>{item.injury}</td>
               <td>{item.hospital}</td>
               <td>{item.ptRef}</td>
-              {/* <td>{item.physicianRef}</td> */}
               <td>
                 <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value)}>
                   <option value="Yes">Yes</option>
@@ -696,7 +579,7 @@ export default function Dashboard(props) {
         </tbody>
       </table>
 
-      <div className="pagination">
+      <div className={styles.pagination}>
         {Array.from({ length: Math.ceil(setTableData.length / itemsPerPage) }, (_, index) => (
           <button key={index} onClick={() => handlePageChange(index + 1)}>
             {index + 1}

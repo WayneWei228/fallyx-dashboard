@@ -9,7 +9,7 @@ const SummaryCard = ({ value, title, subtitle, linkTo }) => {
         {/* 应用summary-link类 */}
         <div className="summary-value">{value}</div>
       </Link>
-      <div className="summary-title">{title}</div>
+      <div className="summary-title">Falls</div>
       <div className="summary-subtitle">{subtitle}</div>
     </div>
   );
