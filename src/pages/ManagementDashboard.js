@@ -293,7 +293,7 @@ export default function Management_Dashboard() {
 
   const summaryData = [
     { value: 20, title: 'Falls', subtitle: 'Niagra LTC', linkTo: '/niagara-ltc' },
-    { value: 18, title: 'Falls', subtitle: 'Mill creek LTC', linkTo: '/dashboard' },
+    { value: 18, title: 'Falls', subtitle: 'Mill creek LTC', linkTo: '/mill-creek-care' },
     { value: 10, title: 'Falls', subtitle: 'The Wellington LTC', linkTo: '/the-wellington-ltc' },
     { value: 15, title: 'Falls', subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
   ];

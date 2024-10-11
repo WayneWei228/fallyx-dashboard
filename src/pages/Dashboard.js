@@ -11,7 +11,9 @@ import csvFile from '../data/demo.csv';
 import * as Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 
-export default function Dashboard() {
+export default function Dashboard(props) {
+  let title = props.title;
+
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);
@@ -534,7 +536,7 @@ export default function Dashboard() {
     <div className="dashboard">
       {/* TODO */}
       {/* <title> */}
-      <h1>The Wellington LTC Falls Dashboard</h1>
+      <h1>{title}</h1>
       {/* </title> */}
 
       {/* <button className="logout-button" onClick={logout}>
