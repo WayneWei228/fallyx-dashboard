@@ -4,16 +4,16 @@ import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import styles from '../styles/Dashboard.module.css';
 import { useNavigate } from 'react-router-dom';
 import { threeData } from '../data/TableData';
-import csvFile from '../data/demo.csv';
 import * as Papa from 'papaparse';
 import { saveAs } from 'file-saver';
-import { Chart, ArcElement, PointElement, LineElement} from 'chart.js';
+import { Chart, ArcElement, PointElement, LineElement } from 'chart.js';
 
 Chart.register(ArcElement, PointElement, LineElement);
 
 export default function Dashboard(props) {
   let title = props.title;
-
+  let csvFile = props.csvFile;
+  
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);
