@@ -9,8 +9,10 @@ import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend }
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export default function Management_Dashboard() {
-  console.log('dashboard re-rendered');
+export default function Management_Dashboard({ dataLengths }) {
+  // console.log('dashboard re-rendered');
+  console.log('data length');
+  console.log(dataLengths);
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);
@@ -172,25 +174,32 @@ export default function Management_Dashboard() {
     updateHomesChart();
   }, [homesTimeRange]);
 
-  useEffect(() => {
-    console.log('fallsChartData');
-    expandedLog(fallsChartData);
-  }, [fallsChartData]);
+  // useEffect(() => {
+  //   console.log('fallsChartData');
+  //   expandedLog(fallsChartData);
+  // }, [fallsChartData]);
 
-  useEffect(() => {
-    console.log('homesChartData');
-    expandedLog(homesChartData);
-  }, [homesChartData]);
+  // useEffect(() => {
+  //   console.log('homesChartData');
+  //   expandedLog(homesChartData);
+  // }, [homesChartData]);
 
   const logout = () => {
     navigate('/login');
   };
 
+  // let summaryData = [
+  //   { value: 20, subtitle: 'Niagra LTC', linkTo: '/niagara-ltc' },
+  //   { value: 18, subtitle: 'Mill creek LTC', linkTo: '/mill-creek-care' },
+  //   { value: dataLengths['wellington'], subtitle: 'The Wellington LTC', linkTo: '/the-wellington-ltc' },
+  //   { value: 15, subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
+  // ];
+
   const summaryData = [
-    { value: 20, subtitle: 'Niagra LTC', linkTo: '/niagara-ltc' },
-    { value: 18, subtitle: 'Mill creek LTC', linkTo: '/mill-creek-care' },
-    { value: 10, subtitle: 'The Wellington LTC', linkTo: '/the-wellington-ltc' },
-    { value: 15, subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
+    { value: dataLengths['niagara'], subtitle: 'Niagara LTC', linkTo: '/niagara-ltc' },
+    { value: dataLengths['millCreek'], subtitle: 'Mill Creek LTC', linkTo: '/mill-creek-care' },
+    { value: dataLengths['wellington'], subtitle: 'The Wellington LTC', linkTo: '/the-wellington-ltc' },
+    { value: dataLengths['iggh'], subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
   ];
 
   return (

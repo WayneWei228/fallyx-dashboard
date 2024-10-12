@@ -10,10 +10,7 @@ import { Chart, ArcElement, PointElement, LineElement } from 'chart.js';
 
 Chart.register(ArcElement, PointElement, LineElement);
 
-export default function Dashboard(props) {
-  let title = props.title;
-  let csvFile = props.csvFile;
-  
+export default function Dashboard({ title, data }) {
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);
@@ -48,9 +45,9 @@ export default function Dashboard(props) {
 
   // State variables
   const threeMonthData = threeData;
-  const [tableData, setTableData] = useState([]);
+  const [tableData, setTableData] = useState(data);
+  const goal = 25;
 
-  const [goal, setGoal] = useState(25);
   const [gaugeChartData, setGaugeChartData] = useState({
     labels: [],
     datasets: [],
@@ -107,13 +104,10 @@ export default function Dashboard(props) {
   };
 
   const [gaugeChart, setGaugeChart] = useState(true);
-
   const [fallsTimeRange, setFallsTimeRange] = useState('current');
-
   const [analysisType, setAnalysisType] = useState('timeOfDay');
   const [analysisTimeRange, setAnalysisTimeRange] = useState('current');
   const [analysisUnit, setAnalysisUnit] = useState('allUnits');
-
   const [analysisHeaderText, setAnalysisHeaderText] = useState('Falls by Time of Day');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -127,27 +121,13 @@ export default function Dashboard(props) {
   // maybe only setState can achieve
 
   useEffect(() => {
-    // Initialize data
-    fetch(csvFile)
-      .then((response) => response.text())
-      .then((text) => {
-        Papa.parse(text, {
-          header: true,
-          skipEmptyLines: true,
-          complete: function (results) {
-            setTableData(results.data);
-          },
-        });
-      });
-  }, []);
-
-  useEffect(() => {
     updateFallsChart();
   }, [fallsTimeRange, tableData]);
 
   useEffect(() => {
     updateAnalysisChart();
   }, [analysisType, analysisTimeRange, analysisUnit, tableData]);
+
 
   // For debug
   // useEffect(() => {

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom'; // 引入Link组件
 import '../styles/SummaryCard.css';
 
-const SummaryCard = ({ value, title, subtitle, linkTo }) => {
+const SummaryCard = ({ value, subtitle, linkTo }) => {
   return (
     <div className="summary-card">
       <Link to={linkTo} className="summary-link">
