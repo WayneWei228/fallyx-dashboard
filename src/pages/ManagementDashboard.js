@@ -1,11 +1,10 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
-// import '../styles/ManagementDashboard.css';
 import styles from '../styles/ManagementDashboard.module.css';
 import { useNavigate } from 'react-router-dom';
 import SummaryCard from './SummaryCard';
 import Modal from './Modal';
-import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, elements } from 'chart.js';
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -46,7 +45,30 @@ export default function Management_Dashboard({ dataLengths }) {
     datasets: [],
   });
 
-  // expandedLog(fallsChartData);
+  const [fallsPopUpData, setFallsPopUpData] = useState([]);
+  const [homesPopUpData, sethomesPopUpData] = useState([]);
+
+  const onClickFalls = (event, elements) => {
+    const index = elements[0].index;
+    const locationName = fallsChartData.labels[index];
+    const headInjury = fallsPopUpData[index].headInjury;
+    const fracture = fallsPopUpData[index].fracture;
+    const skinTear = fallsPopUpData[index].skinTear;
+    const content = [`Head injury: ${headInjury}`, `Fracture: ${fracture}`, `Skin Tear: ${skinTear}`];
+    openModal(locationName, content);
+  };
+
+  const onClickHomes = (event, elements) => {
+    const index = elements[0].index;
+    const locationName = homesChartData.labels[index];
+    const unwrittenNotes = homesPopUpData[index].unwrittenNotes;
+    const missingNotes = homesPopUpData[index].missingNotes;
+    const content = [
+      `Unwritten fall notes by month's end: ${unwrittenNotes}`,
+      `Number of missing post-fall notes: ${missingNotes}`,
+    ];
+    openModal(locationName, content);
+  };
 
   const data_for_current_falls = [
     { name: 'Niagra LTC', value: 2, headInjury: 3, fracture: 2, skinTear: 4 },
@@ -86,7 +108,7 @@ export default function Management_Dashboard({ dataLengths }) {
     setShowModal(false);
   };
 
-  const barCharOptions = {
+  const baseOptions = {
     responsive: true,
     scales: {
       y: {
@@ -106,6 +128,11 @@ export default function Management_Dashboard({ dataLengths }) {
       // easing: 'linear',
     },
   };
+
+  const createOptions = (onClickHandler) => ({
+    ...baseOptions,
+    onClick: onClickHandler,
+  });
 
   const updateFallsChart = () => {
     let newData = [];
@@ -133,6 +160,7 @@ export default function Management_Dashboard({ dataLengths }) {
         },
       ],
     });
+    setFallsPopUpData([...newData]);
   };
 
   const updateHomesChart = () => {
@@ -157,14 +185,13 @@ export default function Management_Dashboard({ dataLengths }) {
           backgroundColor: 'rgba(76, 175, 80, 0.6)',
           borderColor: 'rgb(76, 175, 80)',
           borderWidth: 1,
+          indexAxis: 'x',
         },
       ],
     });
-  };
 
-  // useEffect(() => {
-  //   updateFallsChart();
-  // }, [fallsTimeRange]);
+    sethomesPopUpData([...newData]);
+  };
 
   useEffect(() => {
     console.log('Update Falls Chart');
@@ -225,7 +252,7 @@ export default function Management_Dashboard({ dataLengths }) {
             <option value="current">Current Month</option>
             <option value="3months">Past 3 Months</option>
           </select>
-          {fallsChartData.datasets.length > 0 && <Bar data={fallsChartData} options={barCharOptions} />}
+          {fallsChartData.datasets.length > 0 && <Bar data={fallsChartData} options={createOptions(onClickFalls)} />}
         </div>
 
         <div className={styles['chart']}>
@@ -241,7 +268,7 @@ export default function Management_Dashboard({ dataLengths }) {
             <option value="3months">Past 3 Months</option>
           </select>
 
-          {homesChartData.datasets.length > 0 && <Bar data={homesChartData} options={barCharOptions} />}
+          {homesChartData.datasets.length > 0 && <Bar data={homesChartData} options={createOptions(onClickHomes)} />}
         </div>
       </div>
 
@@ -263,21 +290,6 @@ export default function Management_Dashboard({ dataLengths }) {
     </div>
   );
 }
-
-// onClick={(event, elements) => {
-//   if (elements.length > 0) {
-//     const index = elements[0].index;
-//     const locationName = fallsChartData.datasets.data[index].name;
-//     const { unwrittenNotes, missingNotes } = fallsChartData.datasets.data.find(
-//       (home) => home.name === locationName
-//     );
-//     const content = [
-//       `Unwritten fall notes by month's end: ${unwrittenNotes}`,
-//       `Number of missing post-fall notes: ${missingNotes}`,
-//     ];
-//     openModal(locationName, content);
-//   }
-// }}
 
 // onClick={(event, elements) => {
 //   if (elements.length > 0) {
