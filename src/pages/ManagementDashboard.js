@@ -167,10 +167,12 @@ export default function Management_Dashboard({ dataLengths }) {
   // }, [fallsTimeRange]);
 
   useEffect(() => {
+    console.log('Update Falls Chart');
     updateFallsChart();
   }, [fallsTimeRange]);
 
   useEffect(() => {
+    console.log('Update Homes Chart');
     updateHomesChart();
   }, [homesTimeRange]);
 

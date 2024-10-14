@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { get, ref } from 'firebase/database';
-import { db } from '../firebase'; 
-import '../styles/Login.css'; 
-import fallyxLogo from '../assets/fallyxlogo.jpeg'; 
+import { db } from '../firebase';
+import '../styles/Login.css';
+import fallyxLogo from '../assets/fallyxlogo.jpeg';
+import { Link } from 'react-router-dom';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
@@ -20,11 +21,13 @@ export default function Login() {
       if (users) {
         const user = Object.values(users).find((user) => user.email === username && user.password === password);
         if (user) {
+          navigate(user.redirect);
           // Store login state in localStorage
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('loggedInUser', username);
+          // localStorage.setItem('isLoggedIn', 'true');
+          // localStorage.setItem('loggedInUser', username);
 
-          window.location.href = user.redirect;
+          // window.location.href = user.redirect;
+          // console.log(user.redirect);
         } else {
           setErrorMessage('Invalid email or password');
         }

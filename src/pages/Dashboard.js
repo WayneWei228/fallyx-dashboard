@@ -10,7 +10,9 @@ import { Chart, ArcElement, PointElement, LineElement } from 'chart.js';
 
 Chart.register(ArcElement, PointElement, LineElement);
 
-export default function Dashboard({ title, data }) {
+export default function Dashboard({ name, title, data, handleUpdateCSV }) {
+  // console.log('dashboard re-rendered');
+  // console.log(name);
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);
@@ -26,7 +28,7 @@ export default function Dashboard({ title, data }) {
       console.log(item);
     }
   }
-  // console.log('dashboard re-rendered');
+
   const navigate = useNavigate();
   const months = [
     'January',
@@ -45,9 +47,10 @@ export default function Dashboard({ title, data }) {
 
   // State variables
   const threeMonthData = threeData;
-  const [tableData, setTableData] = useState(data);
+  // const [tableData, setTableData] = useState(data);
   const goal = 25;
 
+  // console.log(tableData);
   const [gaugeChartData, setGaugeChartData] = useState({
     labels: [],
     datasets: [],
@@ -122,12 +125,18 @@ export default function Dashboard({ title, data }) {
 
   useEffect(() => {
     updateFallsChart();
-  }, [fallsTimeRange, tableData]);
+    console.log('Falls Chart');
+  }, [fallsTimeRange, data]);
 
   useEffect(() => {
     updateAnalysisChart();
-  }, [analysisType, analysisTimeRange, analysisUnit, tableData]);
+    console.log('Analysis Chart');
+  }, [analysisType, analysisTimeRange, analysisUnit, data]);
 
+  // useEffect(() => {
+  //   updateFallsChart();
+  //   updateAnalysisChart();
+  // }, []);
 
   // For debug
   // useEffect(() => {
@@ -207,7 +216,7 @@ export default function Dashboard({ title, data }) {
   };
 
   function countTotalFalls() {
-    return tableData.length;
+    return data.length;
   }
 
   const handlePageChange = (newPage) => {
@@ -216,7 +225,11 @@ export default function Dashboard({ title, data }) {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = tableData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+
+  console.log("currentItems")
+  console.log(currentItems);
+
 
   function countFallsByTimeOfDay(data) {
     var timeOfDayCounts = { Morning: 0, Evening: 0, Night: 0 };
@@ -329,7 +342,7 @@ export default function Dashboard({ title, data }) {
 
   const updateAnalysisChart = () => {
     var selectedUnit = analysisUnit;
-    var filteredData = analysisTimeRange === '3months' ? threeMonthData : tableData;
+    var filteredData = analysisTimeRange === '3months' ? threeMonthData : data;
 
     if (selectedUnit !== 'allUnits') {
       filteredData = filteredData.filter(
@@ -394,14 +407,14 @@ export default function Dashboard({ title, data }) {
   //   navigate('/login');
   // };
 
-  const handleUpdateCSV = (index, newValue) => {
-    const updatedData = [...tableData];
-    updatedData[index].physicianRef = newValue;
-    setTableData(updatedData);
-  };
+  // const handleUpdateCSV = (index, newValue) => {
+  //   const updatedData = [...tableData];
+  //   updatedData[index].physicianRef = newValue;
+  //   setTableData(updatedData);
+  // };
 
   const handleSaveCSV = () => {
-    const csv = Papa.unparse(tableData);
+    const csv = Papa.unparse(data);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, 'updated_fall_data.csv');
   };
@@ -433,7 +446,7 @@ export default function Dashboard({ title, data }) {
               <div id="gaugeContainer">
                 <div className={styles.gauge}>
                   {gaugeChartData.datasets.length > 0 && <Doughnut data={gaugeChartData} options={gaugeChartOptions} />}
-                  <div className={styles['gauge-value']}>{tableData.length}</div>
+                  <div className={styles['gauge-value']}>{data.length}</div>
                   <br />
                   <div className={styles['gauge-label']}>falls this month</div>
                   <div className={styles['gauge-goal']}>
@@ -545,7 +558,7 @@ export default function Dashboard({ title, data }) {
               <td>{item.hospital}</td>
               <td>{item.ptRef}</td>
               <td>
-                <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value)}>
+                <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value, name)}>
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                   <option value="N/A">N/A</option>
@@ -560,7 +573,7 @@ export default function Dashboard({ title, data }) {
       </table>
 
       <div className={styles.pagination}>
-        {Array.from({ length: Math.ceil(setTableData.length / itemsPerPage) }, (_, index) => (
+        {Array.from({ length: Math.ceil(data.length / itemsPerPage) }, (_, index) => (
           <button key={index} onClick={() => handlePageChange(index + 1)}>
             {index + 1}
           </button>

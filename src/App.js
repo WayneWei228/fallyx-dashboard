@@ -13,6 +13,7 @@ import csvFile_niagara_ltc from './data/niagara-ltc.csv';
 import * as Papa from 'papaparse';
 
 function App() {
+  // console.log('App is re-rendered');
   const [data, setData] = useState({
     niagara: [],
     wellington: [],
@@ -20,12 +21,14 @@ function App() {
     iggh: [],
   });
 
-  const [dataLengths, setDataLengths] = useState({
-    niagara: 0,
-    wellington: 0,
-    millCreek: 0,
-    iggh: 0,
-  });
+  // console.log(data);
+
+  const dataLengths = {
+    niagara: data.niagara.length,
+    wellington: data.wellington.length,
+    millCreek: data.millCreek.length,
+    iggh: data.iggh.length,
+  };
 
   const fetchAndParseCSV = async (csvFile, key) => {
     fetch(csvFile)
@@ -38,10 +41,6 @@ function App() {
             setData((prevData) => ({
               ...prevData,
               [key]: results.data,
-            }));
-            setDataLengths((prevLengths) => ({
-              ...prevLengths,
-              [key]: results.data.length,
             }));
           },
         });
@@ -56,6 +55,22 @@ function App() {
     fetchAndParseCSV(csvFile_iggh_ltc, 'iggh');
   }, []);
 
+  const handleUpdateCSV = (index, newValue, name) => {
+    console.log('hello');
+    // Create a deep copy of the data object
+    const updatedWholeData = { ...data };
+
+    // Create a new array for the specific dataset (e.g., "niagara") and update the relevant entry
+    const updatedData = [...updatedWholeData[name]];
+    updatedData[index] = { ...updatedData[index], physicianRef: newValue }; // Ensure immutability
+
+    // Update the dataset in the copied object
+    updatedWholeData[name] = updatedData;
+
+    // Set the new state with the updated data
+    setData(updatedWholeData);
+  };
+
   return (
     <Router>
       <Routes>
@@ -66,9 +81,11 @@ function App() {
           path="/the-wellington-ltc"
           element={
             <Dashboard
+              name="wellington"
               title={'The Wellington LTC Falls Dashboard'}
               csvFile={csvFile_the_wellington_ltc}
               data={data.wellington}
+              handleUpdateCSV={handleUpdateCSV}
             />
           }
         ></Route>
@@ -76,8 +93,10 @@ function App() {
           path="/niagara-ltc"
           element={
             <Dashboard
+              name="niagara"
               title="Niagara LTC Falls Dashboard"
-              data={data.niagara} 
+              data={data.niagara}
+              handleUpdateCSV={handleUpdateCSV}
             />
           }
         />
@@ -85,8 +104,10 @@ function App() {
           path="/mill-creek-care"
           element={
             <Dashboard
+              name="millCreek"
               title="Mill Creek Care Center Falls Dashboard"
-              data={data.millCreek} 
+              data={data.millCreek}
+              handleUpdateCSV={handleUpdateCSV}
             />
           }
         />
@@ -94,8 +115,10 @@ function App() {
           path="/iggh-ltc"
           element={
             <Dashboard
+              name="iggh"
               title="Ina Grafton Gage Home Falls Dashboard"
-              data={data.iggh} 
+              data={data.iggh}
+              handleUpdateCSV={handleUpdateCSV}
             />
           }
         />
