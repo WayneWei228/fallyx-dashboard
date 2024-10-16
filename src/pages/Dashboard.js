@@ -227,9 +227,8 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
-  console.log("currentItems")
-  console.log(currentItems);
-
+  // console.log('currentItems');
+  // console.log(currentItems);
 
   function countFallsByTimeOfDay(data) {
     var timeOfDayCounts = { Morning: 0, Evening: 0, Night: 0 };
@@ -537,7 +536,7 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
             <th>Injury</th>
             <th>Transfer to Hospital</th>
             <th>PT Ref</th>
-            <th>Physician Referral (If Applicable)</th>
+            <th>Physician/NP Notification (If Applicable)</th>
             <th>POA Contacted</th>
             <th>Risk Management Incident Fall Written</th>
             <th>3 Post Fall Notes in 72hrs</th>
@@ -558,13 +557,18 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
               <td>{item.hospital}</td>
               <td>{item.ptRef}</td>
               <td>
-                <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value, name)}>
+                <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value, name, true)}>
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                   <option value="N/A">N/A</option>
                 </select>
               </td>
-              <td>{item.poaContacted}</td>
+              <td className={item.poaContacted === 'No' ? styles.cellRed : ''}>
+                <select value={item.poaContacted} onChange={(e) => handleUpdateCSV(i, e.target.value, name, false)}>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </td>
               <td>{item.incidentReport}</td>
               <td>{item.postFallNotes}</td>
             </tr>

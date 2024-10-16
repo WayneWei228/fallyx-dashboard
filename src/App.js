@@ -55,14 +55,17 @@ function App() {
     fetchAndParseCSV(csvFile_iggh_ltc, 'iggh');
   }, []);
 
-  const handleUpdateCSV = (index, newValue, name) => {
-    console.log('hello');
+  const handleUpdateCSV = (index, newValue, name, isPhycicianRef) => {
     // Create a deep copy of the data object
     const updatedWholeData = { ...data };
 
     // Create a new array for the specific dataset (e.g., "niagara") and update the relevant entry
     const updatedData = [...updatedWholeData[name]];
-    updatedData[index] = { ...updatedData[index], physicianRef: newValue }; // Ensure immutability
+    if (isPhycicianRef) {
+      updatedData[index] = { ...updatedData[index], physicianRef: newValue }; // Ensure immutability
+    } else {
+      updatedData[index] = {...updatedData[index], poaContacted: newValue};
+    }
 
     // Update the dataset in the copied object
     updatedWholeData[name] = updatedData;

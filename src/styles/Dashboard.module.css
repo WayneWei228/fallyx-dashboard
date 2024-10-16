@@ -156,3 +156,8 @@ tr:nth-child(even) {
   margin-top: -20px; /* Adjust the spacing as needed */
   color: #333; /* Ensure the color matches */
 }
+
+.cellRed {
+  background-color: red;
+  color: white;
+}

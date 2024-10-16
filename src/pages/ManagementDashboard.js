@@ -231,6 +231,8 @@ export default function Management_Dashboard({ dataLengths }) {
     { value: dataLengths['iggh'], subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
   ];
 
+  
+
   return (
     <div className={styles.dashboard}>
       <h1 className={styles.h1}>Responsive Management Falls</h1>
