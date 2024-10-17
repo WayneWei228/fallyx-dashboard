@@ -5,14 +5,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import ManagementDashboard from './pages/ManagementDashboard';
-import csvFile_iggh_ltc from './data/iggh-ltc.csv';
-import csvFile_the_wellington_ltc from './data/the-wellington-ltc.csv';
-import csvFile_mill_creek_care from './data/mill-creek-care.csv';
-import csvFile_niagara_ltc from './data/niagara-ltc.csv';
 // import TestFirebase from './components/TestFirebase';
 import * as Papa from 'papaparse';
 import { db } from './firebase';
 import { ref, update, get, off, onValue } from 'firebase/database';
+import PrivateRoute from './components/PrivateRoute';
+import Unauthorized from './pages/Unauthorized';
+import UpdateData from './pages/UpdateData';
+
 
 function App() {
   // console.log('App is re-rendered');
@@ -103,24 +103,6 @@ function App() {
   }, []);
 
   const handleUpdateCSV = (index, newValue, name, isPhycicianRef) => {
-    // // Create a deep copy of the data object
-    // const updatedWholeData = { ...data };
-
-    // // Create a new array for the specific dataset (e.g., "niagara") and update the relevant entry
-    // const updatedData = [...updatedWholeData[name]];
-    // if (isPhycicianRef) {
-    //   updatedData[index] = { ...updatedData[index], physicianRef: newValue }; // Ensure immutability
-    // } else {
-    //   updatedData[index] = { ...updatedData[index], poaContacted: newValue };
-    // }
-
-    // // Update the dataset in the copied object
-    // updatedWholeData[name] = updatedData;
-
-    // // Set the new state with the updated data
-    // setData(updatedWholeData);
-    // Define the Firebase reference for the specific row in the Realtime Database
-
     const rowRef = ref(db, `${name}/row-${index}`);
     // Create an object to hold the updates
     let updates = {};
@@ -147,51 +129,75 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />}></Route>
+        <Route path="/unauthorized" element={<Unauthorized />} />
         {/* <Route path="/test" element={<TestFirebase />} /> */}
-        <Route path="/responsive" element={<ManagementDashboard dataLengths={dataLengths} />}></Route>
+
         <Route
-          path="/the-wellington-ltc"
+          path="/update-data"
           element={
-            <Dashboard
-              name="wellington"
-              title={'The Wellington LTC Falls Dashboard'}
-              csvFile={csvFile_the_wellington_ltc}
-              data={data.wellington}
-              handleUpdateCSV={handleUpdateCSV}
-            />
+            <PrivateRoute rolesRequired={['update-data']}>
+              <UpdateData />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/responsive"
+          element={
+            <PrivateRoute rolesRequired={['responsive']}>
+              <ManagementDashboard dataLengths={dataLengths} />
+            </PrivateRoute>
           }
         ></Route>
         <Route
+          path="/the-wellington-ltc"
+          element={
+            <PrivateRoute rolesRequired={['the-wellington-ltc', 'responsive']}>
+              <Dashboard
+                name="wellington"
+                title={'The Wellington LTC Falls Dashboard'}
+                data={data.wellington}
+                handleUpdateCSV={handleUpdateCSV}
+              />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/niagara-ltc"
           element={
-            <Dashboard
-              name="niagara"
-              title="Niagara LTC Falls Dashboard"
-              data={data.niagara}
-              handleUpdateCSV={handleUpdateCSV}
-            />
+            <PrivateRoute rolesRequired={['niagara-ltc', 'responsive']}>
+              <Dashboard
+                name="niagara"
+                title="Niagara LTC Falls Dashboard"
+                data={data.niagara}
+                handleUpdateCSV={handleUpdateCSV}
+              />
+            </PrivateRoute>
           }
         />
         <Route
           path="/mill-creek-care"
           element={
-            <Dashboard
-              name="millCreek"
-              title="Mill Creek Care Center Falls Dashboard"
-              data={data.millCreek}
-              handleUpdateCSV={handleUpdateCSV}
-            />
+            <PrivateRoute rolesRequired={['mill-creek-care', 'responsive']}>
+              <Dashboard
+                name="millCreek"
+                title="Mill Creek Care Center Falls Dashboard"
+                data={data.millCreek}
+                handleUpdateCSV={handleUpdateCSV}
+              />
+            </PrivateRoute>
           }
         />
         <Route
           path="/iggh-ltc"
           element={
-            <Dashboard
-              name="iggh"
-              title="Ina Grafton Gage Home Falls Dashboard"
-              data={data.iggh}
-              handleUpdateCSV={handleUpdateCSV}
-            />
+            <PrivateRoute rolesRequired={['iggh-ltc', 'responsive']}>
+              <Dashboard
+                name="iggh"
+                title="Ina Grafton Gage Home Falls Dashboard"
+                data={data.iggh}
+                handleUpdateCSV={handleUpdateCSV}
+              />
+            </PrivateRoute>
           }
         />
       </Routes>

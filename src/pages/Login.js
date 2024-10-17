@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { get, ref } from 'firebase/database';
-import { db } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, get } from 'firebase/database';
+import { db, auth } from '../firebase';
 import '../styles/Login.css';
 import fallyxLogo from '../assets/fallyxlogo.jpeg';
 import { Link } from 'react-router-dom';
@@ -12,32 +13,58 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const usersRef = ref(db, 'users/');
-      const snapshot = await get(usersRef);
-      const users = snapshot.val();
+  // const handleLogin = async () => {
+  //   try {
+  //     const usersRef = ref(db, 'users/');
+  //     const snapshot = await get(usersRef);
+  //     const users = snapshot.val();
 
-      if (users) {
-        const user = Object.values(users).find((user) => user.email === username && user.password === password);
-        if (user) {
-          navigate(user.redirect);
-          // Store login state in localStorage
-          // localStorage.setItem('isLoggedIn', 'true');
-          // localStorage.setItem('loggedInUser', username);
+  //     if (users) {
+  //       const user = Object.values(users).find((user) => user.email === username && user.password === password);
+  //       if (user) {
+  //         navigate(user.redirect);
+  //         // Store login state in localStorage
+  //         // localStorage.setItem('isLoggedIn', 'true');
+  //         // localStorage.setItem('loggedInUser', username);
 
-          // window.location.href = user.redirect;
-          // console.log(user.redirect);
-        } else {
-          setErrorMessage('Invalid email or password');
-        }
-      } else {
-        setErrorMessage('No users found');
-      }
-    } catch (error) {
-      setErrorMessage('Error logging in');
-      console.error(error);
-    }
+  //         // window.location.href = user.redirect;
+  //         // console.log(user.redirect);
+  //       } else {
+  //         setErrorMessage('Invalid email or password');
+  //       }
+  //     } else {
+  //       setErrorMessage('No users found');
+  //     }
+  //   } catch (error) {
+  //     setErrorMessage('Error logging in');
+  //     console.error(error);
+  //   }
+  // };
+
+  const handleLogin = (event) => {
+    event.preventDefault();
+    const fakeEmail = `${username}@example.com`; // 将用户名伪装成邮箱格式
+
+    // 登录 Firebase
+    signInWithEmailAndPassword(auth, fakeEmail, password)
+      .then((userCredential) => {
+        // 登录成功
+        const user = userCredential.user;
+        console.log('User logged in:', user);
+        setErrorMessage(''); // 清空错误消息
+
+        const userRef = ref(db, `users/${user.uid}`);
+        get(userRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            const role = snapshot.val().role;
+            navigate('/' + role);
+          }
+        });
+      })
+      .catch((error) => {
+        console.error('Error during login:', error);
+        setErrorMessage('Login failed. Please check your credentials.');
+      });
   };
 
   return (
