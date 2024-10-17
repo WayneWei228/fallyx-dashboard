@@ -42,7 +42,9 @@ export default function Login() {
   // };
 
   const handleLogin = (event) => {
-    event.preventDefault();
+    if (event) {
+      event.preventDefault();
+    }
     const fakeEmail = `${username}@example.com`; // 将用户名伪装成邮箱格式
 
     // 登录 Firebase
@@ -80,6 +82,11 @@ export default function Login() {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Enter your username"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              document.getElementById('login-password').focus(); // 当按下Enter时跳转到密码输入框
+            }
+          }}
         />
       </div>
 
@@ -91,6 +98,11 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Enter your password"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleLogin(); // 当按下Enter时直接登录
+            }
+          }}
         />
       </div>
 
