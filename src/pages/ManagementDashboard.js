@@ -10,8 +10,6 @@ Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Management_Dashboard({ dataLengths }) {
   // console.log('dashboard re-rendered');
-  console.log('data length');
-  console.log(dataLengths);
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);

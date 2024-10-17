@@ -50,7 +50,7 @@ export default function Login() {
       .then((userCredential) => {
         // 登录成功
         const user = userCredential.user;
-        console.log('User logged in:', user);
+        // console.log('User logged in:', user);
         setErrorMessage(''); // 清空错误消息
 
         const userRef = ref(db, `users/${user.uid}`);

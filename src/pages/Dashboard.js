@@ -127,12 +127,12 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
 
   useEffect(() => {
     updateFallsChart();
-    console.log('Falls Chart');
+    // console.log('Falls Chart');
   }, [fallsTimeRange, data]);
 
   useEffect(() => {
     updateAnalysisChart();
-    console.log('Analysis Chart');
+    // console.log('Analysis Chart');
   }, [analysisType, analysisTimeRange, analysisUnit, data]);
 
   const updateFallsChart = () => {
