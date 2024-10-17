@@ -7,12 +7,13 @@ import { threeData } from '../data/TableData';
 import * as Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 import { Chart, ArcElement, PointElement, LineElement } from 'chart.js';
+// import { collection, addDoc } from 'firebase/firestore';
+import { ref, set } from 'firebase/database';
+import { db } from '../firebase';
 
 Chart.register(ArcElement, PointElement, LineElement);
 
 export default function Dashboard({ name, title, data, handleUpdateCSV }) {
-  // console.log('dashboard re-rendered');
-  // console.log(name);
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);
@@ -114,6 +115,7 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
   const [analysisHeaderText, setAnalysisHeaderText] = useState('Falls by Time of Day');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+  const [uploading, setUploading] = useState(false);
 
   // for debug
   // console.log('tableData');
@@ -132,21 +134,6 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
     updateAnalysisChart();
     console.log('Analysis Chart');
   }, [analysisType, analysisTimeRange, analysisUnit, data]);
-
-  // useEffect(() => {
-  //   updateFallsChart();
-  //   updateAnalysisChart();
-  // }, []);
-
-  // For debug
-  // useEffect(() => {
-  //   console.log('tableData updated:', tableData);
-  // }, [tableData]);
-
-  // useEffect(() => {
-  //   console.log('gaugeChartData updated:');
-  //   expandedLog(gaugeChartData);
-  // }, [gaugeChartData]);
 
   const updateFallsChart = () => {
     const timeRange = fallsTimeRange;
@@ -412,6 +399,54 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
   //   setTableData(updatedData);
   // };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) {
+      alert('Please select a CSV file!');
+      return;
+    }
+
+    setUploading(true);
+
+    // Use Papa Parse to parse the CSV file
+    Papa.parse(file, {
+      header: true, // Parse as key-value objects
+      skipEmptyLines: true,
+      complete: async (results) => {
+        console.log('CSV parsing complete:', results.data);
+
+        // Loop through parsed results and upload them to Firebase Firestore
+        try {
+          results.data.forEach((row, index) => {
+            // Create a reference for each row in the database
+            const rowRef = ref(db, `${name}/row-${index}`);
+
+            // Set the data at that reference
+            set(rowRef, row)
+              .then(() => {
+                console.log(`Row ${index} uploaded successfully`);
+              })
+              .catch((error) => {
+                console.error(`Error uploading row ${index}:`, error);
+              });
+          });
+          alert('CSV file successfully uploaded to Firebase!');
+        } catch (error) {
+          console.error('Upload error:', error);
+          alert('Upload failed!');
+        }
+
+        setUploading(false);
+      },
+      error: (error) => {
+        console.error('Parsing error:', error);
+        alert('CSV parsing failed!');
+        setUploading(false);
+      },
+    });
+  };
+
   const handleSaveCSV = () => {
     const csv = Papa.unparse(data);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -514,12 +549,17 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
 
       <div className={styles['table-header']}>
         <h2>Falls Tracking Table: August 2024</h2>
-        <div className={styles.buttons}>
-          <div>
-            <button className={styles['download-button']} onClick={handleSaveCSV}>
-              Download as CSV
-            </button>
-          </div>
+        <div className={styles['download-button']}>
+          <input type="file" accept=".csv" style={{ display: 'none' }} id="uploadCSV" onChange={handleFileChange} />
+          <label htmlFor="uploadCSV" style={{ cursor: 'pointer' }}>
+            Upload CSV
+          </label>
+        </div>
+
+        <div>
+          <button className={styles['download-button']} onClick={handleSaveCSV}>
+            Download as CSV
+          </button>
         </div>
       </div>
       <table>

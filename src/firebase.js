@@ -18,6 +18,7 @@ const firebaseConfig = {
 // 初始化Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
 const auth = getAuth(app);
 
 export { db, ref, set, push, auth, signInWithEmailAndPassword, createUserWithEmailAndPassword };

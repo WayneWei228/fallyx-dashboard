@@ -11,6 +11,8 @@ import csvFile_mill_creek_care from './data/mill-creek-care.csv';
 import csvFile_niagara_ltc from './data/niagara-ltc.csv';
 // import TestFirebase from './components/TestFirebase';
 import * as Papa from 'papaparse';
+import { db } from './firebase';
+import { ref, update, get, off, onValue } from 'firebase/database';
 
 function App() {
   // console.log('App is re-rendered');
@@ -30,48 +32,114 @@ function App() {
     iggh: data.iggh.length,
   };
 
-  const fetchAndParseCSV = async (csvFile, key) => {
-    fetch(csvFile)
-      .then((response) => response.text())
-      .then((text) => {
-        Papa.parse(text, {
-          header: true,
-          skipEmptyLines: true,
-          complete: function (results) {
-            setData((prevData) => ({
-              ...prevData,
-              [key]: results.data,
-            }));
-          },
-        });
-      });
+  const fetchDataFromFirebase = (key) => {
+    const dataRef = ref(db, key); // Reference the key in Firebase
+
+    // Use Firebase's onValue to listen for real-time updates
+    const listener = onValue(
+      dataRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const fetchedData = snapshot.val();
+          const fetchedArray = Object.values(fetchedData); // Convert object to array if needed
+
+          // Update the state with the new data
+          setData((prevData) => ({
+            ...prevData,
+            [key]: fetchedArray,
+          }));
+        } else {
+          console.log(`${key} data not found.`);
+        }
+      },
+      (error) => {
+        console.error(`Error fetching ${key} data from Firebase:`, error);
+      }
+    );
+
+    // Return the listener so it can be turned off later
+    return listener;
   };
 
+  // const fetchAndParseCSV = async (csvFile, key) => {
+  //   fetch(csvFile)
+  //     .then((response) => response.text())
+  //     .then((text) => {
+  //       Papa.parse(text, {
+  //         header: true,
+  //         skipEmptyLines: true,
+  //         complete: function (results) {
+  //           setData((prevData) => ({
+  //             ...prevData,
+  //             [key]: results.data,
+  //           }));
+  //         },
+  //       });
+  //     });
+  // };
+
+  // useEffect(() => {
+  //   // 依次解析所有 CSV 文件
+  //   fetchAndParseCSV(csvFile_niagara_ltc, 'niagara');
+  //   fetchAndParseCSV(csvFile_the_wellington_ltc, 'wellington');
+  //   fetchAndParseCSV(csvFile_mill_creek_care, 'millCreek');
+  //   fetchAndParseCSV(csvFile_iggh_ltc, 'iggh');
+  // }, []);
+
   useEffect(() => {
-    // 依次解析所有 CSV 文件
-    fetchAndParseCSV(csvFile_niagara_ltc, 'niagara');
-    fetchAndParseCSV(csvFile_the_wellington_ltc, 'wellington');
-    fetchAndParseCSV(csvFile_mill_creek_care, 'millCreek');
-    fetchAndParseCSV(csvFile_iggh_ltc, 'iggh');
+    // Set up listeners for all datasets
+    const niagaraListener = fetchDataFromFirebase('niagara');
+    const wellingtonListener = fetchDataFromFirebase('wellington');
+    const millCreekListener = fetchDataFromFirebase('millCreek');
+    const igghListener = fetchDataFromFirebase('iggh');
+
+    // Cleanup function to remove the listeners when the component unmounts
+    return () => {
+      off(ref(db, 'niagara'), niagaraListener);
+      off(ref(db, 'wellington'), wellingtonListener);
+      off(ref(db, 'millCreek'), millCreekListener);
+      off(ref(db, 'iggh'), igghListener);
+    };
   }, []);
 
   const handleUpdateCSV = (index, newValue, name, isPhycicianRef) => {
-    // Create a deep copy of the data object
-    const updatedWholeData = { ...data };
+    // // Create a deep copy of the data object
+    // const updatedWholeData = { ...data };
 
-    // Create a new array for the specific dataset (e.g., "niagara") and update the relevant entry
-    const updatedData = [...updatedWholeData[name]];
+    // // Create a new array for the specific dataset (e.g., "niagara") and update the relevant entry
+    // const updatedData = [...updatedWholeData[name]];
+    // if (isPhycicianRef) {
+    //   updatedData[index] = { ...updatedData[index], physicianRef: newValue }; // Ensure immutability
+    // } else {
+    //   updatedData[index] = { ...updatedData[index], poaContacted: newValue };
+    // }
+
+    // // Update the dataset in the copied object
+    // updatedWholeData[name] = updatedData;
+
+    // // Set the new state with the updated data
+    // setData(updatedWholeData);
+    // Define the Firebase reference for the specific row in the Realtime Database
+
+    const rowRef = ref(db, `${name}/row-${index}`);
+    // Create an object to hold the updates
+    let updates = {};
+
+    // Update either the "physicianRef" or "poaContacted" field based on the flag
     if (isPhycicianRef) {
-      updatedData[index] = { ...updatedData[index], physicianRef: newValue }; // Ensure immutability
+      updates = { physicianRef: newValue };
     } else {
-      updatedData[index] = {...updatedData[index], poaContacted: newValue};
+      updates = { poaContacted: newValue };
     }
 
-    // Update the dataset in the copied object
-    updatedWholeData[name] = updatedData;
-
-    // Set the new state with the updated data
-    setData(updatedWholeData);
+    // Use Firebase's update method to update the specific field in the database
+    update(rowRef, updates)
+      .then(() => {
+        console.log('Data updated successfully in Firebase');
+      })
+      .catch((error) => {
+        console.error('Error updating data:', error);
+      });
   };
 
   return (
@@ -79,6 +147,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />}></Route>
+        {/* <Route path="/test" element={<TestFirebase />} /> */}
         <Route path="/responsive" element={<ManagementDashboard dataLengths={dataLengths} />}></Route>
         <Route
           path="/the-wellington-ltc"
