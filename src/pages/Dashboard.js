@@ -113,8 +113,6 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
   const [analysisTimeRange, setAnalysisTimeRange] = useState('current');
   const [analysisUnit, setAnalysisUnit] = useState('allUnits');
   const [analysisHeaderText, setAnalysisHeaderText] = useState('Falls by Time of Day');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
   const [uploading, setUploading] = useState(false);
 
   // for debug
@@ -205,17 +203,6 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
   function countTotalFalls() {
     return data.length;
   }
-
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-  };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
-
-  // console.log('currentItems');
-  // console.log(currentItems);
 
   function countFallsByTimeOfDay(data) {
     var timeOfDayCounts = { Morning: 0, Evening: 0, Night: 0 };
@@ -528,7 +515,7 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
           </tr>
         </thead>
         <tbody id="fallsTableBody">
-          {currentItems.map((item, i) => (
+          {data.map((item, i) => (
             <tr key={i}>
               <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
               <td>{item.name}</td>
@@ -560,14 +547,6 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
           ))}
         </tbody>
       </table>
-
-      <div className={styles.pagination}>
-        {Array.from({ length: Math.ceil(data.length / itemsPerPage) }, (_, index) => (
-          <button key={index} onClick={() => handlePageChange(index + 1)}>
-            {index + 1}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
