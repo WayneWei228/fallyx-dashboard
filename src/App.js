@@ -13,7 +13,6 @@ import PrivateRoute from './components/PrivateRoute';
 import Unauthorized from './pages/Unauthorized';
 import UpdateData from './pages/UpdateData';
 
-
 function App() {
   // console.log('App is re-rendered');
   const [data, setData] = useState({
@@ -22,8 +21,6 @@ function App() {
     millCreek: [],
     iggh: [],
   });
-
-  // console.log(data);
 
   const dataLengths = {
     niagara: data.niagara.length,
@@ -86,13 +83,15 @@ function App() {
   //   fetchAndParseCSV(csvFile_iggh_ltc, 'iggh');
   // }, []);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     // Set up listeners for all datasets
     const niagaraListener = fetchDataFromFirebase('niagara');
     const wellingtonListener = fetchDataFromFirebase('wellington');
     const millCreekListener = fetchDataFromFirebase('millCreek');
     const igghListener = fetchDataFromFirebase('iggh');
-
+    setIsLoading(false);
     // Cleanup function to remove the listeners when the component unmounts
     return () => {
       off(ref(db, 'niagara'), niagaraListener);
@@ -101,6 +100,10 @@ function App() {
       off(ref(db, 'iggh'), igghListener);
     };
   }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   const handleUpdateCSV = (index, newValue, name, isPhycicianRef) => {
     const rowRef = ref(db, `${name}/row-${index}`);

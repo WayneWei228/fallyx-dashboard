@@ -500,7 +500,7 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
       </div>
 
       <div className={styles['table-header']}>
-        <h2>Falls Tracking Table: August 2024</h2>
+        <h2>Falls Tracking Table: October 2024</h2>
         <div>
           <button className={styles['download-button']} onClick={handleSaveCSV}>
             Download as CSV
