@@ -127,7 +127,7 @@ function App() {
               <Dashboard
                 name="wellington"
                 title={'The Wellington LTC Falls Dashboard'}
-                unitSelectionValues={['All Units', 'Gage North', 'Gage West', 'Lawrence']}
+                unitSelectionValues={['allUnits', 'Gage North', 'Gage West', 'Lawrence']}
               />
             </PrivateRoute>
           }
@@ -142,7 +142,7 @@ function App() {
                 // data={data.niagara}
                 // handleUpdateCSV={handleUpdateCSV}
                 unitSelectionValues={[
-                  'All Units',
+                  'allUnits',
                   'Shaw',
                   'Shaw Two',
                   'Shaw Three',
@@ -166,7 +166,7 @@ function App() {
                 title="Mill Creek Care Center Falls Dashboard"
                 // data={data.millCreek}
                 // handleUpdateCSV={handleUpdateCSV}
-                unitSelectionValues={['All Units', 'Ground W', '2 East', '2 West', '3 East', '3 West']}
+                unitSelectionValues={['allUnits', 'Ground W', '2 East', '2 West', '3 East', '3 West']}
               />
             </PrivateRoute>
           }
@@ -180,7 +180,7 @@ function App() {
                 title="Ina Grafton Gage Home Falls Dashboard"
                 // data={data.iggh}
                 // handleUpdateCSV={handleUpdateCSV}
-                unitSelectionValues={['All Units', '1st Floor', '2nd Floor', '3rd Floor', '4th Floor']}
+                unitSelectionValues={['allUnits', '1st Floor', '2nd Floor', '3rd Floor', '4th Floor']}
               />
             </PrivateRoute>
           }

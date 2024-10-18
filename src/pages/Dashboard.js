@@ -16,7 +16,7 @@ Chart.register(ArcElement, PointElement, LineElement);
 
 export default function Dashboard({ name, title, unitSelectionValues }) {
   const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
@@ -477,15 +477,15 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
     // console.log('Analysis Chart');
   }, [analysisType, analysisTimeRange, analysisUnit, data]);
 
-  useEffect(() => {
-    if (data.length > 0) {
-      setIsLoading(false);
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (data.length > 0) {
+  //     setIsLoading(false);
+  //   }
+  // }, [data]);
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  // if (isLoading) {
+  //   return <Loading />;
+  // }
 
   return (
     <div className={styles.dashboard}>
