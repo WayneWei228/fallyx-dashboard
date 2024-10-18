@@ -13,7 +13,7 @@ import { db } from '../firebase';
 
 Chart.register(ArcElement, PointElement, LineElement);
 
-export default function Dashboard({ name, title, data, handleUpdateCSV }) {
+export default function Dashboard({ name, title, data, handleUpdateCSV, unitSelectionValues }) {
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);
@@ -474,12 +474,17 @@ export default function Dashboard({ name, title, data, handleUpdateCSV }) {
               setAnalysisUnit(e.target.value);
             }}
           >
-            <option value="allUnits">All Units</option>
+            {/* <option value="allUnits">All Units</option>
             <option value="Ground W">Ground W</option>
             <option value="2 East E">2 East</option>
             <option value="2 West W">2 West</option>
             <option value="3 East E">3 East</option>
-            <option value="3 West W">3 West</option>
+            <option value="3 West W">3 West</option> */}
+            {unitSelectionValues.map((unit) => (
+              <option key={unit} value={unit}>
+                {unit}
+              </option>
+            ))}
           </select>
 
           {analysisChartData.datasets.length > 0 && <Bar data={analysisChartData} options={analysisChartOptions} />}

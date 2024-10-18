@@ -38,6 +38,8 @@ function App() {
       (snapshot) => {
         if (snapshot.exists()) {
           const fetchedData = snapshot.val();
+          // console.log(key);
+          // console.log(fetchedData);
           const fetchedArray = Object.values(fetchedData); // Convert object to array if needed
 
           // Update the state with the new data
@@ -160,6 +162,7 @@ function App() {
                 title={'The Wellington LTC Falls Dashboard'}
                 data={data.wellington}
                 handleUpdateCSV={handleUpdateCSV}
+                unitSelectionValues={['All Units', 'Gage North', 'Gage West', 'Lawrence']}
               />
             </PrivateRoute>
           }
@@ -173,6 +176,18 @@ function App() {
                 title="Niagara LTC Falls Dashboard"
                 data={data.niagara}
                 handleUpdateCSV={handleUpdateCSV}
+                unitSelectionValues={[
+                  'All Units',
+                  'Shaw',
+                  'Shaw Two',
+                  'Shaw Three',
+                  'Pinery',
+                  'Pinery Two',
+                  'Pinery Three',
+                  'Wellington',
+                  'Lawrence',
+                  'Gage',
+                ]}
               />
             </PrivateRoute>
           }
@@ -186,6 +201,7 @@ function App() {
                 title="Mill Creek Care Center Falls Dashboard"
                 data={data.millCreek}
                 handleUpdateCSV={handleUpdateCSV}
+                unitSelectionValues={['All Units', 'Ground W', '2 East', '2 West', '3 East', '3 West']}
               />
             </PrivateRoute>
           }
@@ -199,6 +215,7 @@ function App() {
                 title="Ina Grafton Gage Home Falls Dashboard"
                 data={data.iggh}
                 handleUpdateCSV={handleUpdateCSV}
+                unitSelectionValues={['All Units', '1st Floor', '2nd Floor', '3rd Floor', '4th Floor']}
               />
             </PrivateRoute>
           }
