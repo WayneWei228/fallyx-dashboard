@@ -12,122 +12,89 @@ import { ref, update, get, off, onValue } from 'firebase/database';
 import PrivateRoute from './components/PrivateRoute';
 import Unauthorized from './pages/Unauthorized';
 import UpdateData from './pages/UpdateData';
+import Loading from './pages/Loading';
 
 function App() {
   // console.log('App is re-rendered');
-  const [data, setData] = useState({
-    niagara: [],
-    wellington: [],
-    millCreek: [],
-    iggh: [],
-  });
 
-  const dataLengths = {
-    niagara: data.niagara.length,
-    wellington: data.wellington.length,
-    millCreek: data.millCreek.length,
-    iggh: data.iggh.length,
-  };
+  // const [data, setData] = useState({
+  //   niagara: [],
+  //   wellington: [],
+  //   millCreek: [],
+  //   iggh: [],
+  // });
 
-  const fetchDataFromFirebase = (key) => {
-    const dataRef = ref(db, key); // Reference the key in Firebase
-
-    // Use Firebase's onValue to listen for real-time updates
-    const listener = onValue(
-      dataRef,
-      (snapshot) => {
-        if (snapshot.exists()) {
-          const fetchedData = snapshot.val();
-          // console.log(key);
-          // console.log(fetchedData);
-          const fetchedArray = Object.values(fetchedData); // Convert object to array if needed
-
-          // Update the state with the new data
-          setData((prevData) => ({
-            ...prevData,
-            [key]: fetchedArray,
-          }));
-        } else {
-          console.log(`${key} data not found.`);
-        }
-      },
-      (error) => {
-        console.error(`Error fetching ${key} data from Firebase:`, error);
-      }
-    );
-
-    // Return the listener so it can be turned off later
-    return listener;
-  };
-
-  // const fetchAndParseCSV = async (csvFile, key) => {
-  //   fetch(csvFile)
-  //     .then((response) => response.text())
-  //     .then((text) => {
-  //       Papa.parse(text, {
-  //         header: true,
-  //         skipEmptyLines: true,
-  //         complete: function (results) {
-  //           setData((prevData) => ({
-  //             ...prevData,
-  //             [key]: results.data,
-  //           }));
-  //         },
-  //       });
-  //     });
+  // const dataLengths = {
+  //   niagara: data.niagara.length,
+  //   wellington: data.wellington.length,
+  //   millCreek: data.millCreek.length,
+  //   iggh: data.iggh.length,
   // };
 
+  const dataLengths = {
+    niagara: 15,
+    wellington: 8,
+    millCreek: 15,
+    iggh: 15,
+  };
+
+  // const fetchDataFromFirebase = (key) => {
+  //   const dataRef = ref(db, key); // Reference the key in Firebase
+
+  //   // Use Firebase's onValue to listen for real-time updates
+  //   const listener = onValue(
+  //     dataRef,
+  //     (snapshot) => {
+  //       if (snapshot.exists()) {
+  //         const fetchedData = snapshot.val();
+  //         const fetchedArray = Object.values(fetchedData); // Convert object to array if needed
+  //         console.log('fetchedArray');
+  //         console.log(fetchedArray);
+  //         // Update the state with the new data
+  //         setData((prevData) => ({
+  //           ...prevData,
+  //           [key]: fetchedArray,
+  //         }));
+  //       } else {
+  //         console.log(`${key} data not found.`);
+  //       }
+  //     },
+  //     (error) => {
+  //       console.error(`Error fetching ${key} data from Firebase:`, error);
+  //     }
+  //   );
+
+  //   // Return the listener so it can be turned off later
+  //   return listener;
+  // };
+
+  // const [isLoading, setIsLoading] = useState(true);
+
   // useEffect(() => {
-  //   // 依次解析所有 CSV 文件
-  //   fetchAndParseCSV(csvFile_niagara_ltc, 'niagara');
-  //   fetchAndParseCSV(csvFile_the_wellington_ltc, 'wellington');
-  //   fetchAndParseCSV(csvFile_mill_creek_care, 'millCreek');
-  //   fetchAndParseCSV(csvFile_iggh_ltc, 'iggh');
+  //   // Set up listeners for all datasets
+  //   const niagaraListener = fetchDataFromFirebase('niagara');
+  //   const wellingtonListener = fetchDataFromFirebase('wellington');
+  //   const millCreekListener = fetchDataFromFirebase('millCreek');
+  //   const igghListener = fetchDataFromFirebase('iggh');
+  //   // Cleanup function to remove the listeners when the component unmounts
+  //   return () => {
+  //     off(ref(db, 'niagara'), niagaraListener);
+  //     off(ref(db, 'wellington'), wellingtonListener);
+  //     off(ref(db, 'millCreek'), millCreekListener);
+  //     off(ref(db, 'iggh'), igghListener);
+  //   };
   // }, []);
 
-  const [isLoading, setIsLoading] = useState(true);
+  // useEffect(() => {
+  //   if (data.niagara.length > 0 && data.wellington.length > 0 && data.millCreek.length > 0 && data.iggh.length > 0) {
+  //     setIsLoading(false);
+  //   }
+  // }, [data]); // 当数据变化时检查是否还在加载
+  // console.log(isLoading);
 
-  useEffect(() => {
-    // Set up listeners for all datasets
-    const niagaraListener = fetchDataFromFirebase('niagara');
-    const wellingtonListener = fetchDataFromFirebase('wellington');
-    const millCreekListener = fetchDataFromFirebase('millCreek');
-    const igghListener = fetchDataFromFirebase('iggh');
-    setIsLoading(false);
-    // Cleanup function to remove the listeners when the component unmounts
-    return () => {
-      off(ref(db, 'niagara'), niagaraListener);
-      off(ref(db, 'wellington'), wellingtonListener);
-      off(ref(db, 'millCreek'), millCreekListener);
-      off(ref(db, 'iggh'), igghListener);
-    };
-  }, []);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  const handleUpdateCSV = (index, newValue, name, isPhycicianRef) => {
-    const rowRef = ref(db, `${name}/row-${index}`);
-    // Create an object to hold the updates
-    let updates = {};
-
-    // Update either the "physicianRef" or "poaContacted" field based on the flag
-    if (isPhycicianRef) {
-      updates = { physicianRef: newValue };
-    } else {
-      updates = { poaContacted: newValue };
-    }
-
-    // Use Firebase's update method to update the specific field in the database
-    update(rowRef, updates)
-      .then(() => {
-        console.log('Data updated successfully in Firebase');
-      })
-      .catch((error) => {
-        console.error('Error updating data:', error);
-      });
-  };
+  // if (isLoading) {
+  //   return <Loading></Loading>;
+  // }
 
   return (
     <Router>
@@ -160,8 +127,6 @@ function App() {
               <Dashboard
                 name="wellington"
                 title={'The Wellington LTC Falls Dashboard'}
-                data={data.wellington}
-                handleUpdateCSV={handleUpdateCSV}
                 unitSelectionValues={['All Units', 'Gage North', 'Gage West', 'Lawrence']}
               />
             </PrivateRoute>
@@ -174,8 +139,8 @@ function App() {
               <Dashboard
                 name="niagara"
                 title="Niagara LTC Falls Dashboard"
-                data={data.niagara}
-                handleUpdateCSV={handleUpdateCSV}
+                // data={data.niagara}
+                // handleUpdateCSV={handleUpdateCSV}
                 unitSelectionValues={[
                   'All Units',
                   'Shaw',
@@ -199,8 +164,8 @@ function App() {
               <Dashboard
                 name="millCreek"
                 title="Mill Creek Care Center Falls Dashboard"
-                data={data.millCreek}
-                handleUpdateCSV={handleUpdateCSV}
+                // data={data.millCreek}
+                // handleUpdateCSV={handleUpdateCSV}
                 unitSelectionValues={['All Units', 'Ground W', '2 East', '2 West', '3 East', '3 West']}
               />
             </PrivateRoute>
@@ -213,8 +178,8 @@ function App() {
               <Dashboard
                 name="iggh"
                 title="Ina Grafton Gage Home Falls Dashboard"
-                data={data.iggh}
-                handleUpdateCSV={handleUpdateCSV}
+                // data={data.iggh}
+                // handleUpdateCSV={handleUpdateCSV}
                 unitSelectionValues={['All Units', '1st Floor', '2nd Floor', '3rd Floor', '4th Floor']}
               />
             </PrivateRoute>

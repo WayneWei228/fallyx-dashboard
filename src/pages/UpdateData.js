@@ -6,7 +6,7 @@ import { db } from '../firebase'; // 引入 Firebase 实例
 const UpdateData = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedDashboard, setSelectedDashboard] = useState('');
-  
+
   const dashboards = [
     { name: 'wellington', label: 'The Wellington LTC' },
     { name: 'niagara', label: 'Niagara LTC' },
@@ -33,6 +33,7 @@ const UpdateData = () => {
     Papa.parse(file, {
       header: true, // 解析为键值对
       skipEmptyLines: true,
+      quoteChar: '"',
       complete: async (results) => {
         console.log('CSV parsing complete:', results.data);
 
@@ -72,10 +73,7 @@ const UpdateData = () => {
       <h2>Upload Data to Dashboard</h2>
       <div>
         <label>Select a dashboard:</label>
-        <select
-          value={selectedDashboard}
-          onChange={(e) => setSelectedDashboard(e.target.value)}
-        >
+        <select value={selectedDashboard} onChange={(e) => setSelectedDashboard(e.target.value)}>
           <option value="">-- Select a Dashboard --</option>
           {dashboards.map((dashboard) => (
             <option key={dashboard.name} value={dashboard.name}>

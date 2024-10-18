@@ -8,12 +8,16 @@ import * as Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 import { Chart, ArcElement, PointElement, LineElement } from 'chart.js';
 // import { collection, addDoc } from 'firebase/firestore';
-import { ref, set } from 'firebase/database';
+import { ref, onValue, off, get, update } from 'firebase/database';
 import { db } from '../firebase';
+import Loading from './Loading';
 
 Chart.register(ArcElement, PointElement, LineElement);
 
-export default function Dashboard({ name, title, data, handleUpdateCSV, unitSelectionValues }) {
+export default function Dashboard({ name, title, unitSelectionValues }) {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   function expandedLog(item, maxDepth = 100, depth = 0) {
     if (depth > maxDepth) {
       console.log(item);
@@ -113,7 +117,6 @@ export default function Dashboard({ name, title, data, handleUpdateCSV, unitSele
   const [analysisTimeRange, setAnalysisTimeRange] = useState('current');
   const [analysisUnit, setAnalysisUnit] = useState('allUnits');
   const [analysisHeaderText, setAnalysisHeaderText] = useState('Falls by Time of Day');
-  const [uploading, setUploading] = useState(false);
 
   // for debug
   // console.log('tableData');
@@ -122,16 +125,6 @@ export default function Dashboard({ name, title, data, handleUpdateCSV, unitSele
   // expandedLog(gaugeChartData);
 
   // maybe only setState can achieve
-
-  useEffect(() => {
-    updateFallsChart();
-    // console.log('Falls Chart');
-  }, [fallsTimeRange, data]);
-
-  useEffect(() => {
-    updateAnalysisChart();
-    // console.log('Analysis Chart');
-  }, [analysisType, analysisTimeRange, analysisUnit, data]);
 
   const updateFallsChart = () => {
     const timeRange = fallsTimeRange;
@@ -392,6 +385,108 @@ export default function Dashboard({ name, title, data, handleUpdateCSV, unitSele
     saveAs(blob, 'updated_fall_data.csv');
   };
 
+  const handleUpdateCSV = (index, newValue, name, isPhycicianRef) => {
+    const rowRef = ref(db, `${name}/row-${index}`);
+    // Create an object to hold the updates
+    let updates = {};
+
+    // Update either the "physicianRef" or "poaContacted" field based on the flag
+    if (isPhycicianRef) {
+      updates = { physicianRef: newValue };
+    } else {
+      updates = { poaContacted: newValue };
+    }
+
+    // Use Firebase's update method to update the specific field in the database
+    update(rowRef, updates)
+      .then(() => {
+        console.log('Data updated successfully in Firebase');
+      })
+      .catch((error) => {
+        console.error('Error updating data:', error);
+      });
+  };
+
+  useEffect(() => {
+    // Start measuring fetch data time
+    performance.mark('start-fetch-data');
+
+    const dataRef = ref(db, name); // Firebase ref for this specific dashboard
+
+    const listener = onValue(dataRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const fetchedData = snapshot.val();
+
+        // End measuring fetch data time
+        performance.mark('end-fetch-data');
+        performance.measure('Fetch Data Time', 'start-fetch-data', 'end-fetch-data');
+
+        const fetchDataTime = performance.getEntriesByName('Fetch Data Time')[0].duration;
+        console.log('Fetch Data Time: ', fetchDataTime, 'ms'); // Logs the time it took for fetching data
+
+        // Object.keys(fetchedData) will give you all the keys, i.e., 'row-0', 'row-1', etc.
+        // Sort the keys and then map them to the corresponding values
+        const sortedData = Object.keys(fetchedData)
+          .sort((a, b) => {
+            const rowA = parseInt(a.split('-')[1], 10); // Extract number from 'row-x'
+            const rowB = parseInt(b.split('-')[1], 10);
+            return rowA - rowB; // Sort in ascending order
+          })
+          .map((key) => fetchedData[key]); // Map sorted keys to the values
+
+        setData(sortedData); // Update state with the sorted data
+      } else {
+        console.log(`${name} data not found.`);
+      }
+    });
+
+    return () => {
+      off(dataRef, listener); // Cleanup listener on unmount
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     console.log(name);
+  //     const dataRef = ref(db, name); // Firebase ref for this specific dashboard
+  //     console.log(dataRef);
+  //     try {
+  //       const snapshot = await get(dataRef); // 使用 get 获取一次数据
+  //       if (snapshot.exists()) {
+  //         const fetchedData = snapshot.val();
+  //         const fetchedArray = Object.values(fetchedData); // Convert object to array
+  //         setData(fetchedArray);
+  //       } else {
+  //         console.log(`${name} data not found.`);
+  //       }
+  //     } catch (error) {
+  //       console.error(`Error fetching data for ${name}:`, error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+  useEffect(() => {
+    updateFallsChart();
+    // console.log('Falls Chart');
+  }, [fallsTimeRange, data]);
+
+  useEffect(() => {
+    updateAnalysisChart();
+    // console.log('Analysis Chart');
+  }, [analysisType, analysisTimeRange, analysisUnit, data]);
+
+  useEffect(() => {
+    if (data.length > 0) {
+      setIsLoading(false);
+    }
+  }, [data]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className={styles.dashboard}>
       <h1>{title}</h1>
@@ -474,12 +569,6 @@ export default function Dashboard({ name, title, data, handleUpdateCSV, unitSele
               setAnalysisUnit(e.target.value);
             }}
           >
-            {/* <option value="allUnits">All Units</option>
-            <option value="Ground W">Ground W</option>
-            <option value="2 East E">2 East</option>
-            <option value="2 West W">2 West</option>
-            <option value="3 East E">3 East</option>
-            <option value="3 West W">3 West</option> */}
             {unitSelectionValues.map((unit) => (
               <option key={unit} value={unit}>
                 {unit}
@@ -547,7 +636,7 @@ export default function Dashboard({ name, title, data, handleUpdateCSV, unitSele
                 </select>
               </td>
               <td>{item.incidentReport}</td>
-              <td>{item.postFallNotes}</td>
+              <td className={item.postFallNotes < 3 ? styles.cellRed : ''}>{item.postFallNotes}</td>
             </tr>
           ))}
         </tbody>

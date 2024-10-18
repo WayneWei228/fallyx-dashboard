@@ -6,6 +6,8 @@ import { db, auth } from '../firebase';
 import '../styles/Login.css';
 import fallyxLogo from '../assets/fallyxlogo.jpeg';
 import { Link } from 'react-router-dom';
+// import { setLogLevel } from 'firebase/app';
+// setLogLevel('debug');
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -13,60 +15,43 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  // const handleLogin = async () => {
-  //   try {
-  //     const usersRef = ref(db, 'users/');
-  //     const snapshot = await get(usersRef);
-  //     const users = snapshot.val();
+  const handleLogin = async (event) => {
+    if (event) event.preventDefault();
 
-  //     if (users) {
-  //       const user = Object.values(users).find((user) => user.email === username && user.password === password);
-  //       if (user) {
-  //         navigate(user.redirect);
-  //         // Store login state in localStorage
-  //         // localStorage.setItem('isLoggedIn', 'true');
-  //         // localStorage.setItem('loggedInUser', username);
+    performance.clearMarks();
+    performance.clearMeasures();
 
-  //         // window.location.href = user.redirect;
-  //         // console.log(user.redirect);
-  //       } else {
-  //         setErrorMessage('Invalid email or password');
-  //       }
-  //     } else {
-  //       setErrorMessage('No users found');
-  //     }
-  //   } catch (error) {
-  //     setErrorMessage('Error logging in');
-  //     console.error(error);
-  //   }
-  // };
+    const fakeEmail = `${username}@example.com`;
 
-  const handleLogin = (event) => {
-    if (event) {
-      event.preventDefault();
+    performance.mark('start-signin');
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, fakeEmail, password);
+      performance.mark('end-signin');
+      performance.measure('Sign-in Time', 'start-signin', 'end-signin');
+
+      const signInEntries = performance.getEntriesByName('Sign-in Time');
+      const signInTime = signInEntries[signInEntries.length - 1].duration;
+      console.log('Sign-in Time:', signInTime, 'ms');
+
+      // Now measure the get(userRef) operation
+      performance.mark('start-getUser');
+      const userSnapshot = await get(ref(db, `users/${userCredential.user.uid}`));
+      performance.mark('end-getUser');
+      performance.measure('Get User Time', 'start-getUser', 'end-getUser');
+
+      const getUserEntries = performance.getEntriesByName('Get User Time');
+      const getUserTime = getUserEntries[getUserEntries.length - 1].duration;
+      console.log('Get User Time:', getUserTime, 'ms');
+
+      // Proceed with navigation
+      if (userSnapshot.exists()) {
+        const role = userSnapshot.val().role;
+        navigate('/' + role);
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      setErrorMessage('Login failed. Please check your credentials.');
     }
-    const fakeEmail = `${username}@example.com`; // 将用户名伪装成邮箱格式
-
-    // 登录 Firebase
-    signInWithEmailAndPassword(auth, fakeEmail, password)
-      .then((userCredential) => {
-        // 登录成功
-        const user = userCredential.user;
-        // console.log('User logged in:', user);
-        setErrorMessage(''); // 清空错误消息
-
-        const userRef = ref(db, `users/${user.uid}`);
-        get(userRef).then((snapshot) => {
-          if (snapshot.exists()) {
-            const role = snapshot.val().role;
-            navigate('/' + role);
-          }
-        });
-      })
-      .catch((error) => {
-        console.error('Error during login:', error);
-        setErrorMessage('Login failed. Please check your credentials.');
-      });
   };
 
   return (
