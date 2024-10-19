@@ -53,7 +53,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
   // State variables
   const threeMonthData = threeData;
   // const [tableData, setTableData] = useState(data);
-  const goal = 25;
+  const goal = 10;
 
   // console.log(tableData);
   const [gaugeChartData, setGaugeChartData] = useState({
@@ -523,7 +523,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
                   <br />
                   <div className={styles['gauge-scale']}>
                     <span>0</span>
-                    <span>25</span>
+                    <span>{goal}</span>
                   </div>
                 </div>
               </div>
@@ -588,55 +588,59 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
           </button>
         </div>
       </div>
-      <table>
+      <table style={{ width: '100%' }}>
+        {' '}
+        {/* Set the table width to 100% to make it wider */}
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Name</th>
-            <th>Time</th>
-            <th>Location</th>
-            <th>Home Unit</th>
-            <th>Nature of Fall/Cause</th>
-            <th>Interventions</th>
-            <th>HIR</th>
-            <th>Injury</th>
-            <th>Transfer to Hospital</th>
-            <th>PT Ref</th>
-            <th>Physician/NP Notification (If Applicable)</th>
-            <th>POA Contacted</th>
-            <th>Risk Management Incident Fall Written</th>
-            <th>3 Post Fall Notes in 72hrs</th>
+            <th style={{ fontSize: '18px' }}>Date</th> {/* Increased font size */}
+            <th style={{ fontSize: '18px' }}>Name</th>
+            <th style={{ fontSize: '18px' }}>Time</th>
+            <th style={{ fontSize: '18px' }}>Location</th>
+            <th style={{ fontSize: '18px' }}>Home Unit</th>
+            <th style={{ fontSize: '18px' }}>Nature of Fall/Cause</th>
+            <th style={{ fontSize: '18px' }}>Interventions</th>
+            <th style={{ fontSize: '18px' }}>HIR</th>
+            <th style={{ fontSize: '18px' }}>Injury</th>
+            <th style={{ fontSize: '18px' }}>Transfer to Hospital</th>
+            <th style={{ fontSize: '18px' }}>PT Ref</th>
+            <th style={{ fontSize: '18px' }}>Physician/NP Notification (If Applicable)</th>
+            <th style={{ fontSize: '18px' }}>POA Contacted</th>
+            <th style={{ fontSize: '18px' }}>Risk Management Incident Fall Written</th>
+            <th style={{ fontSize: '18px' }}>3 Post Fall Notes in 72hrs</th>
           </tr>
         </thead>
         <tbody id="fallsTableBody">
           {data.map((item, i) => (
             <tr key={i}>
-              <td style={{ whiteSpace: 'nowrap' }}>{item.date}</td>
-              <td>{item.name}</td>
-              <td>{item.time}</td>
-              <td>{item.location}</td>
-              <td>{item.homeUnit}</td>
-              <td>{item.cause}</td>
-              <td>{item.interventions}</td>
-              <td>{item.hir}</td>
-              <td>{item.injury}</td>
-              <td>{item.hospital}</td>
-              <td>{item.ptRef}</td>
-              <td>
+              <td style={{ whiteSpace: 'nowrap', fontSize: '16px' }}>{item.date}</td> {/* Increased font size */}
+              <td style={{ fontSize: '16px' }}>{item.name}</td>
+              <td style={{ fontSize: '16px' }}>{item.time}</td>
+              <td style={{ fontSize: '16px' }}>{item.location}</td>
+              <td style={{ fontSize: '16px' }}>{item.homeUnit}</td>
+              <td style={{ fontSize: '16px' }}>{item.cause}</td>
+              <td style={{ fontSize: '16px' }}>{item.interventions}</td>
+              <td style={{ fontSize: '16px' }}>{item.hir}</td>
+              <td style={{ fontSize: '16px' }}>{item.injury}</td>
+              <td style={{ fontSize: '16px' }}>{item.hospital}</td>
+              <td style={{ fontSize: '16px' }}>{item.ptRef}</td>
+              <td style={{ fontSize: '16px' }}>
                 <select value={item.physicianRef} onChange={(e) => handleUpdateCSV(i, e.target.value, name, true)}>
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                   <option value="N/A">N/A</option>
                 </select>
               </td>
-              <td className={item.poaContacted === 'No' ? styles.cellRed : ''}>
+              <td className={item.poaContacted === 'No' ? styles.cellRed : ''} style={{ fontSize: '16px' }}>
                 <select value={item.poaContacted} onChange={(e) => handleUpdateCSV(i, e.target.value, name, false)}>
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                 </select>
               </td>
-              <td>{item.incidentReport}</td>
-              <td className={item.postFallNotes < 3 ? styles.cellRed : ''}>{item.postFallNotes}</td>
+              <td style={{ fontSize: '16px' }}>{item.incidentReport}</td>
+              <td className={item.postFallNotes < 3 ? styles.cellRed : ''} style={{ fontSize: '16px' }}>
+                {item.postFallNotes}
+              </td>
             </tr>
           ))}
         </tbody>
