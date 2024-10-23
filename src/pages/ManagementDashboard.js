@@ -37,14 +37,14 @@ export default function ManagementDashboard() {
     { name: 'Niagara LTC', value: 8, headInjury: 3, fracture: 2, skinTear: 3 },
     { name: 'Mill Creek LTC', value: 12, headInjury: 4, fracture: 3, skinTear: 5 },
     { name: 'The Wellington LTC', value: 15, headInjury: 5, fracture: 4, skinTear: 6 },
-    { name: 'Ina Graftin LTC', value: 14, headInjury: 4, fracture: 5, skinTear: 5 },
+    { name: 'Ina Grafton LTC', value: 14, headInjury: 4, fracture: 5, skinTear: 5 },
   ];
 
   const data_for_three_months_non_compliance = [
     { name: 'Niagara LTC', poaNotNotified: 5, unwrittenNotes: 3 },
     { name: 'Mill Creek LTC', poaNotNotified: 6, unwrittenNotes: 4 },
     { name: 'The Wellington LTC', poaNotNotified: 10, unwrittenNotes: 7 },
-    { name: 'Ina Graftin LTC', poaNotNotified: 8, unwrittenNotes: 6 },
+    { name: 'Ina Grafton LTC', poaNotNotified: 8, unwrittenNotes: 6 },
   ];
 
   const [dataLengths, setDataLengths] = useState({});
@@ -103,7 +103,7 @@ export default function ManagementDashboard() {
         'Niagara LTC': 0,
         'Mill Creek LTC': 0,
         'The Wellington LTC': 0,
-        'Ina Graftin LTC': 0,
+        'Ina Grafton LTC': 0,
       };
       let popupData = [];
 
@@ -159,7 +159,7 @@ export default function ManagementDashboard() {
         'Niagara LTC': { poaNotNotified: 0, unwrittenNotes: 0 },
         'Mill Creek LTC': { poaNotNotified: 0, unwrittenNotes: 0 },
         'The Wellington LTC': { poaNotNotified: 0, unwrittenNotes: 0 },
-        'Ina Graftin LTC': { poaNotNotified: 0, unwrittenNotes: 0 },
+        'Ina Grafton LTC': { poaNotNotified: 0, unwrittenNotes: 0 },
       };
 
       homes.forEach((home) => {
@@ -195,7 +195,7 @@ export default function ManagementDashboard() {
   const homeToName = (home) => {
     switch (home) {
       case 'iggh':
-        return 'Ina Graftin LTC';
+        return 'Ina Grafton LTC';
       case 'millCreek':
         return 'Mill Creek LTC';
       case 'niagara':
@@ -325,7 +325,7 @@ export default function ManagementDashboard() {
       { value: dataLengths['niagara'], subtitle: 'Niagara LTC', linkTo: '/niagara-ltc' },
       { value: dataLengths['millCreek'], subtitle: 'Mill Creek LTC', linkTo: '/mill-creek-care' },
       { value: dataLengths['wellington'], subtitle: 'The Wellington LTC', linkTo: '/the-wellington-ltc' },
-      { value: dataLengths['iggh'], subtitle: 'Ina Graftin LTC', linkTo: '/iggh-ltc' },
+      { value: dataLengths['iggh'], subtitle: 'Ina Grafton LTC', linkTo: '/iggh-ltc' },
     ];
 
     setSummaryData(updatedSummaryData);
