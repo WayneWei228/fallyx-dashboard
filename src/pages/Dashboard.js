@@ -138,7 +138,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
     updatedData[currentRowIndex].interventions = currentIntervention;
     updatedData[currentRowIndex].isInterventionUpdated = true;
 
-    const rowRef = ref(db, `/dev/${name}/row-${currentRowIndex}`);
+    const rowRef = ref(db, `/${name}/row-${currentRowIndex}`);
     update(rowRef, { interventions: currentIntervention, isInterventionUpdated: true })
       .then(() => {
         console.log('Intervention updated successfully');
@@ -422,7 +422,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
   };
 
   const AddNoUpdate = async (name) => {
-    const igghRef = ref(db, `dev/${name}`);
+    const igghRef = ref(db, `/${name}`);
     const snapshot = await get(igghRef);
 
     if (snapshot.val()) {
@@ -432,7 +432,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
       snapshot.forEach((childSnapshot) => {
         const rowKey = childSnapshot.key;
         console.log(rowKey);
-        updates[`dev/${name}/${rowKey}/isInterventionUpdated`] = false;
+        updates[`/${name}/${rowKey}/isInterventionUpdated`] = false;
       });
       console.log(updates);
       // 批量更新所有节点
@@ -442,7 +442,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
   };
 
   const handleUpdateCSV = (index, newValue, name, isPhycicianRef) => {
-    const rowRef = ref(db, `/dev/${name}/row-${index}`);
+    const rowRef = ref(db, `/${name}/row-${index}`);
     // Create an object to hold the updates
     let updates = {};
 
@@ -466,7 +466,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
   useEffect(() => {
     // Start measuring fetch data time
     performance.mark('start-fetch-data');
-    const dataRef = ref(db, `dev/${name}`); // Firebase ref for this specific dashboard
+    const dataRef = ref(db, `/${name}`); // Firebase ref for this specific dashboard
     // const dataRef = ref(db, name);
 
     const listener = onValue(dataRef, (snapshot) => {
