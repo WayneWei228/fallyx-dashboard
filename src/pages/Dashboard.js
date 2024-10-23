@@ -118,6 +118,42 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
   const [analysisUnit, setAnalysisUnit] = useState('allUnits');
   const [analysisHeaderText, setAnalysisHeaderText] = useState('Falls by Time of Day');
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentIntervention, setCurrentIntervention] = useState('');
+  const [currentRowIndex, setCurrentRowIndex] = useState(null);
+
+  const handleEditIntervention = (index) => {
+    setCurrentIntervention(data[index].interventions);
+    setCurrentRowIndex(index);
+    setIsModalOpen(true);
+  };
+
+  const handleSubmitIntervention = () => {
+    if (currentIntervention === data[currentRowIndex].interventions) {
+      setIsModalOpen(false);
+      return;
+    }
+
+    const updatedData = [...data];
+    updatedData[currentRowIndex].interventions = currentIntervention;
+    updatedData[currentRowIndex].isInterventionUpdated = true;
+
+    const rowRef = ref(db, `/dev/${name}/row-${currentRowIndex}`);
+    update(rowRef, { interventions: currentIntervention, isInterventionUpdated: true })
+      .then(() => {
+        console.log('Intervention updated successfully');
+        setData(updatedData);
+        setIsModalOpen(false);
+      })
+      .catch((error) => {
+        console.error('Error updating intervention:', error);
+      });
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   // for debug
   // console.log('tableData');
   // console.log(tableData);
@@ -385,8 +421,28 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
     saveAs(blob, 'updated_fall_data.csv');
   };
 
+  const AddNoUpdate = async (name) => {
+    const igghRef = ref(db, `dev/${name}`);
+    const snapshot = await get(igghRef);
+
+    if (snapshot.val()) {
+      const updates = {};
+
+      // 遍历所有的 row-X 节点
+      snapshot.forEach((childSnapshot) => {
+        const rowKey = childSnapshot.key;
+        console.log(rowKey);
+        updates[`dev/${name}/${rowKey}/isInterventionUpdated`] = false;
+      });
+      console.log(updates);
+      // 批量更新所有节点
+      await update(ref(db), updates);
+      console.log('Successfully updated all rows');
+    }
+  };
+
   const handleUpdateCSV = (index, newValue, name, isPhycicianRef) => {
-    const rowRef = ref(db, `${name}/row-${index}`);
+    const rowRef = ref(db, `/dev/${name}/row-${index}`);
     // Create an object to hold the updates
     let updates = {};
 
@@ -410,8 +466,8 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
   useEffect(() => {
     // Start measuring fetch data time
     performance.mark('start-fetch-data');
-
-    const dataRef = ref(db, name); // Firebase ref for this specific dashboard
+    const dataRef = ref(db, `dev/${name}`); // Firebase ref for this specific dashboard
+    // const dataRef = ref(db, name);
 
     const listener = onValue(dataRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -445,28 +501,6 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
     };
   }, []);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     console.log(name);
-  //     const dataRef = ref(db, name); // Firebase ref for this specific dashboard
-  //     console.log(dataRef);
-  //     try {
-  //       const snapshot = await get(dataRef); // 使用 get 获取一次数据
-  //       if (snapshot.exists()) {
-  //         const fetchedData = snapshot.val();
-  //         const fetchedArray = Object.values(fetchedData); // Convert object to array
-  //         setData(fetchedArray);
-  //       } else {
-  //         console.log(`${name} data not found.`);
-  //       }
-  //     } catch (error) {
-  //       console.error(`Error fetching data for ${name}:`, error);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
   useEffect(() => {
     updateFallsChart();
     // console.log('Falls Chart');
@@ -476,16 +510,6 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
     updateAnalysisChart();
     // console.log('Analysis Chart');
   }, [analysisType, analysisTimeRange, analysisUnit, data]);
-
-  // useEffect(() => {
-  //   if (data.length > 0) {
-  //     setIsLoading(false);
-  //   }
-  // }, [data]);
-
-  // if (isLoading) {
-  //   return <Loading />;
-  // }
 
   return (
     <div className={styles.dashboard}>
@@ -588,6 +612,11 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
           </button>
         </div>
       </div>
+
+      {/* <di>
+        <button onClick={() => AddNoUpdate("wellington")}>Update</button>
+      </di> */}
+
       <table style={{ width: '100%' }}>
         {' '}
         {/* Set the table width to 100% to make it wider */}
@@ -619,7 +648,11 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
               <td style={{ fontSize: '16px' }}>{item.location}</td>
               <td style={{ fontSize: '16px' }}>{item.homeUnit}</td>
               <td style={{ fontSize: '16px' }}>{item.cause}</td>
-              <td style={{ fontSize: '16px' }}>{item.interventions}</td>
+              <td style={{ fontSize: '16px', color: item.isInterventionUpdated ? 'green' : 'inherit' }}>
+                {item.interventions}
+                <br></br>
+                <button onClick={() => handleEditIntervention(i)}>Edit</button>
+              </td>
               <td style={{ fontSize: '16px' }}>{item.hir}</td>
               <td style={{ fontSize: '16px' }}>{item.injury}</td>
               <td style={{ fontSize: '16px' }}>{item.hospital}</td>
@@ -645,6 +678,19 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
           ))}
         </tbody>
       </table>
+      {isModalOpen && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div>
+              <h2>Edit Interventions</h2>
+              <textarea value={currentIntervention} onChange={(e) => setCurrentIntervention(e.target.value)} />
+              <br />
+              <button onClick={handleSubmitIntervention}>Submit</button>
+              <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -161,3 +161,64 @@ tr:nth-child(even) {
   background-color: red;
   color: white;
 }
+
+/* Control the background and positioning of the modal */
+.modal {
+  position: fixed; /* Fixed positioning, does not scroll with the page */
+  top: 50%; /* 50% from the top of the page */
+  left: 50%; /* 50% from the left of the page */
+  transform: translate(-50%, -50%); /* Move to the center both horizontally and vertically */
+  background-color: #fff; /* Background color is white */
+  padding: 20px; /* Padding */
+  z-index: 1000; /* Ensure the modal is above other elements */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a shadow effect to the modal */
+  border-radius: 8px; /* Rounded corners */
+  width: 400px; /* Width of the modal */
+  max-width: 100%; /* Ensure it doesn't exceed the viewport on smaller screens */
+}
+
+/* Control the layout of the content inside the modal */
+.modalContent {
+  display: flex;
+  flex-direction: column; /* Arrange content vertically */
+}
+
+/* Style for the textarea */
+.modal textarea {
+  margin-top: 10px;
+
+  width: 95%; /* Take up the full width of the parent element */
+  height: 100px; /* Height set to 100px */
+  padding: 10px; /* Add some padding inside the textarea */
+  border-radius: 4px; /* Rounded corners */
+  border: 1px solid #ccc; /* Border color */
+  font-size: 16px; /* Font size */
+}
+
+/* Style for the buttons */
+.modal button {
+  margin-top: 10px; /* Add some spacing above the button */
+  padding: 10px 15px; /* Add padding inside the button */
+  background-color: #4caf50; /* Button background color */
+  color: white; /* Button text color */
+  border: none; /* Remove default border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Show pointer on hover */
+  font-size: 16px; /* Font size */
+  transition: background-color 0.3s ease; /* Add transition effect */
+}
+
+/* Change background color when the mouse hovers over the button */
+.modal button:hover {
+  background-color: #45a049;
+}
+
+/* Style for the Cancel button, typically with a different color */
+.modal button:last-child {
+  background-color: #f44336; /* Cancel button background color is red */
+}
+
+/* Change the cancel button color on hover */
+.modal button:last-child:hover {
+  background-color: #d32f2f;
+}

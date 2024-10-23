@@ -32,10 +32,10 @@ function App() {
   // };
 
   const dataLengths = {
-    niagara: 15,
+    niagara: 16,
     wellington: 8,
-    millCreek: 15,
-    iggh: 15,
+    millCreek: 16,
+    iggh: 16,
   };
 
   // const fetchDataFromFirebase = (key) => {
