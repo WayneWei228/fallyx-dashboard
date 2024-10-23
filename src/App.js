@@ -116,7 +116,8 @@ function App() {
           path="/responsive"
           element={
             <PrivateRoute rolesRequired={['responsive']}>
-              <ManagementDashboard dataLengths={dataLengths} />
+              {/* <ManagementDashboard dataLengths={dataLengths} /> */}
+              <ManagementDashboard></ManagementDashboard>
             </PrivateRoute>
           }
         ></Route>

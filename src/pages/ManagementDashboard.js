@@ -10,7 +10,7 @@ import { db } from '../firebase';
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export default function ManagementDashboard({ dataLengths }) {
+export default function ManagementDashboard() {
   const navigate = useNavigate();
 
   const [showModal, setShowModal] = useState(false);
@@ -46,6 +46,39 @@ export default function ManagementDashboard({ dataLengths }) {
     { name: 'The Wellington LTC', poaNotNotified: 10, unwrittenNotes: 7 },
     { name: 'Ina Graftin LTC', poaNotNotified: 8, unwrittenNotes: 6 },
   ];
+
+  const [dataLengths, setDataLengths] = useState({});
+
+  const getDataLengths = async () => {
+    const homes = ['niagara', 'millCreek', 'wellington', 'iggh'];
+    const dataLengths = {};
+
+    await Promise.all(
+      homes.map((home) => {
+        return new Promise((resolve) => {
+          const homeRef = ref(db, home); // Reference to the home in Firebase
+
+          onValue(homeRef, (snapshot) => {
+            const data = snapshot.val();
+            // Count the number of items (rows) under each home
+            dataLengths[home] = data ? Object.keys(data).length : 0;
+            resolve();
+          });
+        });
+      })
+    );
+
+    return dataLengths; // { niagara: X, millCreek: Y, wellington: Z, iggh: W }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const lengths = await getDataLengths();
+      setDataLengths(lengths);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const homes = ['iggh', 'millCreek', 'niagara', 'wellington'];
