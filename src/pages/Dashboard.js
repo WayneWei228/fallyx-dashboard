@@ -136,10 +136,10 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
 
     const updatedData = [...data];
     updatedData[currentRowIndex].interventions = currentIntervention;
-    updatedData[currentRowIndex].isInterventionUpdated = true;
+    updatedData[currentRowIndex].isInterventionUpdated = "Yes";
 
     const rowRef = ref(db, `/${name}/row-${currentRowIndex}`);
-    update(rowRef, { interventions: currentIntervention, isInterventionUpdated: true })
+    update(rowRef, { interventions: currentIntervention, isInterventionUpdated: "Yes" })
       .then(() => {
         console.log('Intervention updated successfully');
         setData(updatedData);
@@ -432,7 +432,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
       snapshot.forEach((childSnapshot) => {
         const rowKey = childSnapshot.key;
         console.log(rowKey);
-        updates[`/${name}/${rowKey}/isInterventionUpdated`] = false;
+        updates[`/${name}/${rowKey}/isInterventionUpdated`] = "No";
       });
       console.log(updates);
       // 批量更新所有节点
@@ -648,7 +648,7 @@ export default function Dashboard({ name, title, unitSelectionValues }) {
               <td style={{ fontSize: '16px' }}>{item.location}</td>
               <td style={{ fontSize: '16px' }}>{item.homeUnit}</td>
               <td style={{ fontSize: '16px' }}>{item.cause}</td>
-              <td style={{ fontSize: '16px', color: item.isInterventionUpdated ? 'green' : 'inherit' }}>
+              <td style={{ fontSize: '16px', color: (item.isInterventionUpdated === "Yes")? 'green' : 'inherit' }}>
                 {item.interventions}
                 <br></br>
                 <button onClick={() => handleEditIntervention(i)}>Edit</button>
